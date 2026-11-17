@@ -3,349 +3,320 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Deriv Intelligent Market Analyser</title>
+<meta name="theme-color" content="#080f1d">
+<title>Deriv Intelligent Market Analyser V2</title>
 
 <style>
-:root {
-    --bg: #080d18;
-    --panel: #111b2b;
-    --panel2: #162338;
-    --border: #253650;
-    --text: #edf4ff;
-    --muted: #8497b3;
-    --cyan: #00e5ff;
-    --green: #00e69a;
-    --red: #ff5470;
-    --yellow: #ffc857;
-    --purple: #aa85ff;
+:root{
+--bg:#080f1d;
+--panel:#111e32;
+--panel2:#192943;
+--line:#30435e;
+--text:#edf5ff;
+--muted:#91a5c0;
+--cyan:#00e5ff;
+--green:#00e69a;
+--red:#ff5b75;
+--gold:#ffd166;
+--purple:#b69aff;
 }
 
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:radial-gradient(ellipse at top,#183653,#080f1d 55%);
+color:var(--text);
+font-family:Arial,sans-serif;
+padding-bottom:85px;
 }
 
-body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Arial, sans-serif;
+header{
+position:sticky;
+top:0;
+z-index:10;
+background:#091525ee;
+border-bottom:1px solid var(--line);
+padding:14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+backdrop-filter:blur(12px);
 }
 
-header {
-    padding: 17px;
-    background: #101a2b;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+.logo{
+font-weight:900;
+letter-spacing:1px;
+color:var(--cyan);
 }
 
-.logo {
-    font-size: 19px;
-    font-weight: 900;
-    color: var(--cyan);
+.logo span{color:white}
+
+.status{
+font-size:10px;
+font-weight:bold;
+color:var(--gold);
 }
 
-.logo span {
-    color: white;
+.container{
+max-width:1400px;
+margin:auto;
+padding:12px;
 }
 
-.status {
-    font-size: 12px;
-    color: var(--yellow);
+.panel{
+background:linear-gradient(145deg,#13233a,#0e192a);
+border:1px solid var(--line);
+border-radius:14px;
+padding:14px;
+margin-bottom:12px;
 }
 
-.container {
-    max-width: 1500px;
-    margin: auto;
-    padding: 16px;
+h2{
+font-size:13px;
+color:var(--cyan);
+letter-spacing:.8px;
+margin:0 0 13px;
 }
 
-.panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 13px;
-    padding: 16px;
-    margin-bottom: 15px;
+h3{
+font-size:10px;
+color:var(--muted);
+margin:0 0 7px;
 }
 
-h2 {
-    font-size: 15px;
-    margin: 0 0 15px;
-    color: var(--cyan);
+select,button{
+background:var(--panel2);
+color:white;
+border:1px solid var(--line);
+border-radius:9px;
+padding:12px;
+font-size:13px;
 }
 
-h3 {
-    font-size: 13px;
-    color: var(--muted);
-    margin: 0 0 9px;
+select{width:100%}
+
+button{
+font-weight:bold;
+cursor:pointer;
 }
 
-select, button {
-    background: var(--panel2);
-    color: white;
-    border: 1px solid var(--border);
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 13px;
+.primary{
+background:linear-gradient(110deg,#007bb5,#00b9c9);
+border:0;
 }
 
-select {
-    width: 100%;
+.danger{background:#582238}
+
+.market-row{
+display:grid;
+grid-template-columns:1.5fr 1fr;
+gap:12px;
 }
 
-button {
-    cursor: pointer;
-    font-weight: bold;
+.button-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
 }
 
-button:hover {
-    border-color: var(--cyan);
+.cards{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:9px;
 }
 
-.primary {
-    background: linear-gradient(120deg,#007fbc,#00b8c9);
-    color: white;
-    border: none;
+.metric{
+background:var(--panel2);
+padding:11px;
+border-radius:9px;
+min-width:0;
 }
 
-.danger {
-    background: #66243a;
+.metric small{
+font-size:9px;
+color:var(--muted);
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(4,1fr);
-    gap: 12px;
+.metric strong{
+display:block;
+font-size:18px;
+margin-top:6px;
+overflow-wrap:anywhere;
 }
 
-.metric {
-    background: var(--panel2);
-    padding: 13px;
-    border-radius: 10px;
-    min-width: 0;
+.hero{
+display:grid;
+grid-template-columns:1fr 1fr;
+align-items:center;
+gap:8px;
 }
 
-.metric strong {
-    display: block;
-    font-size: 20px;
-    margin-top: 7px;
-    overflow-wrap: anywhere;
+.hero-digit{text-align:center}
+
+.big-digit{
+font-size:clamp(90px,20vw,150px);
+font-weight:900;
+color:var(--cyan);
+text-shadow:0 0 22px #00e5ff88;
+line-height:1.1;
+min-height:1.1em;
 }
 
-.metric small {
-    color: var(--muted);
-    font-size: 11px;
+.pop{animation:pop .25s ease}
+
+@keyframes pop{
+0%{transform:scale(.6);opacity:.4}
+75%{transform:scale(1.15)}
+100%{transform:scale(1);opacity:1}
 }
 
-.market-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+.digits{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:7px;
 }
 
-.digit-display {
-    text-align: center;
-    padding: 12px;
+.digit{
+background:var(--panel2);
+border:1px solid var(--line);
+border-radius:9px;
+padding:9px 3px;
+text-align:center;
 }
 
-.big-digit {
-    font-size: clamp(85px,18vw,145px);
-    font-weight: 900;
-    color: var(--cyan);
-    line-height: 1.2;
-    text-shadow: 0 0 18px #00e5ff88;
-    transition: .2s;
+.digit b{font-size:22px}
+
+.digit small{
+display:block;
+color:var(--muted);
+font-size:9px;
+margin-top:4px;
 }
 
-.pop {
-    animation: pop .28s ease;
+.digit.hot{border-color:var(--green)}
+.digit.cold{border-color:var(--red)}
+
+.bar{
+height:4px;
+border-radius:5px;
+background:#30425c;
+margin-top:7px;
+overflow:hidden;
 }
 
-@keyframes pop {
-    0% {transform: scale(.55); opacity:.3;}
-    65% {transform: scale(1.2);}
-    100% {transform: scale(1); opacity:1;}
+.bar i{
+display:block;
+height:100%;
+background:linear-gradient(90deg,#007cb7,var(--cyan));
 }
 
-.digit-grid {
-    display: grid;
-    grid-template-columns: repeat(5,1fr);
-    gap: 9px;
+.split{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
 }
 
-.digit-box {
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    text-align: center;
-    padding: 11px 3px;
+.predictions{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px;
 }
 
-.digit-box .number {
-    font-size: 23px;
-    font-weight: 900;
+.prediction{
+background:var(--panel2);
+border-radius:9px;
+text-align:center;
+padding:12px 4px;
 }
 
-.digit-box small {
-    display: block;
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 5px;
+.prediction strong{
+display:block;
+color:var(--cyan);
+font-size:20px;
+margin:8px 0;
 }
 
-.digit-box.hot {
-    border-color: var(--green);
-    box-shadow: 0 0 10px #00e69a22;
+.prediction small{
+font-size:9px;
+color:var(--muted);
 }
 
-.digit-box.cold {
-    border-color: var(--red);
+.result{
+background:#091525;
+border:1px solid var(--line);
+border-radius:9px;
+padding:11px;
+margin-top:9px;
+font-size:12px;
+line-height:1.7;
+overflow-wrap:anywhere;
 }
 
-.bar {
-    height: 6px;
-    background: #26364d;
-    border-radius: 10px;
-    margin-top: 8px;
-    overflow: hidden;
+.muted{color:var(--muted);font-size:10px}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.gold{color:var(--gold)}
+.cyan{color:var(--cyan)}
+
+table{
+border-collapse:collapse;
+width:100%;
+font-size:10px;
 }
 
-.bar-fill {
-    height: 100%;
-    background: var(--cyan);
-    width: 0%;
-    transition: .3s;
+td,th{
+padding:8px 5px;
+border-bottom:1px solid var(--line);
+text-align:left;
 }
 
-.section-label {
-    color: var(--muted);
-    font-size: 11px;
-    margin-bottom: 7px;
+th{color:var(--cyan)}
+
+.scroll{overflow-x:auto}
+
+.dock{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+z-index:20;
+background:#081321ee;
+border-top:1px solid var(--line);
+padding:9px 12px;
+display:flex;
+align-items:center;
+gap:10px;
+backdrop-filter:blur(12px);
 }
 
-.signal {
-    font-size: 21px;
-    font-weight: 900;
+.dock button{
+flex:1;
+padding:15px;
+font-size:15px;
+letter-spacing:.7px;
 }
 
-.green {
-    color: var(--green);
+.dock span{
+font-size:10px;
+color:var(--muted);
 }
 
-.red {
-    color: var(--red);
+footer{
+text-align:center;
+padding:18px;
+color:var(--muted);
+font-size:10px;
 }
 
-.yellow {
-    color: var(--yellow);
-}
-
-.cyan {
-    color: var(--cyan);
-}
-
-.purple {
-    color: var(--purple);
-}
-
-.controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.controls button {
-    min-height: 45px;
-}
-
-.scan-button {
-    width: 100%;
-    padding: 17px;
-    font-size: 17px;
-    letter-spacing: 1px;
-    margin: 8px 0;
-}
-
-.result-box {
-    background: #0c1524;
-    border: 1px solid var(--border);
-    padding: 14px;
-    border-radius: 10px;
-    margin-top: 10px;
-    line-height: 1.7;
-    font-size: 13px;
-}
-
-.prediction-grid {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 10px;
-}
-
-.prediction {
-    text-align: center;
-    background: var(--panel2);
-    border-radius: 10px;
-    padding: 14px 5px;
-}
-
-.prediction strong {
-    display: block;
-    font-size: 20px;
-    color: var(--cyan);
-    margin: 8px 0;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-
-td,th {
-    padding: 10px 6px;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-}
-
-th {
-    color: var(--cyan);
-}
-
-.history-wrap {
-    overflow-x: auto;
-}
-
-footer {
-    text-align: center;
-    color: var(--muted);
-    font-size: 11px;
-    padding: 25px 10px;
-}
-
-@media(max-width:650px) {
-    .grid {
-        grid-template-columns: repeat(2,1fr);
-    }
-
-    .market-row {
-        grid-template-columns: 1fr;
-    }
-
-    .container {
-        padding: 10px;
-    }
-
-    .prediction-grid {
-        gap: 6px;
-    }
-
-    .prediction {
-        padding: 12px 3px;
-    }
+@media(max-width:650px){
+.container{padding:8px}
+.panel{padding:11px}
+.market-row{grid-template-columns:1fr}
+.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.hero{grid-template-columns:1fr 1fr}
+.big-digit{font-size:clamp(78px,23vw,112px)}
+.metric strong{font-size:16px}
 }
 </style>
 </head>
@@ -353,1494 +324,1063 @@ footer {
 <body>
 
 <header>
-    <div class="logo">
-        DERIV <span>INTELLIGENCE</span>
-    </div>
-
-    <div id="connectionStatus" class="status">
-        ● DISCONNECTED
-    </div>
+<div class="logo">DERIV <span>INTELLIGENCE V2</span></div>
+<div id="status" class="status">● READY</div>
 </header>
 
-<div class="container">
+<main class="container">
 
-<!-- MARKET SELECTION -->
+<section class="panel">
+<h2>MARKET CONTROL CENTRE</h2>
 
-<div class="panel">
+<div class="market-row">
+<div>
+<h3>SELECT ONE MARKET</h3>
 
-    <h2>MARKET CONTROL CENTRE</h2>
-
-    <div class="market-row">
-
-        <div>
-            <h3>SELECT MARKET</h3>
-
-            <select id="marketSelect">
-                <option value="1HZ10V">Volatility 10 (1s)</option>
-                <option value="1HZ25V">Volatility 25 (1s)</option>
-                <option value="1HZ50V">Volatility 50 (1s)</option>
-                <option value="1HZ75V">Volatility 75 (1s)</option>
-                <option value="1HZ100V">Volatility 100 (1s)</option>
-                <option value="R_10">Volatility 10</option>
-                <option value="R_25">Volatility 25</option>
-                <option value="R_50">Volatility 50</option>
-                <option value="R_75">Volatility 75</option>
-                <option value="R_100">Volatility 100</option>
-            </select>
-        </div>
-
-        <div>
-            <h3>CONNECTION</h3>
-
-            <div class="controls">
-                <button class="primary" onclick="connectMarket()">
-                    CONNECT
-                </button>
-
-                <button class="danger" onclick="disconnectMarket()">
-                    DISCONNECT
-                </button>
-            </div>
-        </div>
-
-    </div>
+<select id="market">
+<option value="1HZ10V">Volatility 10 (1s)</option>
+<option value="1HZ25V">Volatility 25 (1s)</option>
+<option value="1HZ50V">Volatility 50 (1s)</option>
+<option value="1HZ75V">Volatility 75 (1s)</option>
+<option value="1HZ100V">Volatility 100 (1s)</option>
+<option value="R_10">Volatility 10</option>
+<option value="R_25">Volatility 25</option>
+<option value="R_50">Volatility 50</option>
+<option value="R_75">Volatility 75</option>
+<option value="R_100">Volatility 100</option>
+</select>
 </div>
 
-<!-- MAIN METRICS -->
+<div>
+<h3>CONNECTION</h3>
+<div class="button-row">
+<button id="connect" class="primary">CONNECT</button>
+<button id="disconnect" class="danger">DISCONNECT</button>
+</div>
+</div>
+</div>
+</section>
 
-<div class="grid">
+<section class="cards">
+<div class="metric"><small>LAST PRICE</small><strong id="price">---</strong></div>
+<div class="metric"><small>LAST DIGIT</small><strong id="lastdigit" class="cyan">---</strong></div>
+<div class="metric"><small>BUFFERED TICKS</small><strong id="ticks">0</strong></div>
+<div class="metric"><small>MARKET TREND</small><strong id="trend">---</strong></div>
+</section>
 
-    <div class="metric">
-        <small>LAST PRICE</small>
-        <strong id="lastPrice">---</strong>
-    </div>
-
-    <div class="metric">
-        <small>LAST DIGIT</small>
-        <strong id="lastDigitMetric" class="cyan">---</strong>
-    </div>
-
-    <div class="metric">
-        <small>TOTAL TICKS</small>
-        <strong id="tickCount">0</strong>
-    </div>
-
-    <div class="metric">
-        <small>MARKET TREND</small>
-        <strong id="trendMetric">---</strong>
-    </div>
-
+<section class="panel hero">
+<div class="hero-digit">
+<h2>LIVE LAST DIGIT</h2>
+<div id="bigdigit" class="big-digit">--</div>
+<div id="updated" class="muted">Waiting for ticks</div>
 </div>
 
-<!-- LAST DIGIT -->
+<div>
+<h2>LIVE SNAPSHOT</h2>
+<div class="metric">
+<small>ACTIVE MARKET</small>
+<strong id="active">1HZ10V</strong>
+</div>
+<div class="metric" style="margin-top:8px">
+<small>LAST TICK TIME</small>
+<strong id="epoch">---</strong>
+</div>
+<div class="metric" style="margin-top:8px">
+<small>DATA SAMPLE</small>
+<strong id="sample">WAITING</strong>
+</div>
+</div>
+</section>
 
-<div class="panel digit-display">
+<section class="panel">
+<h2>DIGIT DISTRIBUTION · 0–9</h2>
+<div id="digitgrid" class="digits"></div>
 
-    <h2>LIVE LAST DIGIT INTELLIGENCE</h2>
+<div class="result">
+<b class="green">HOT DIGITS:</b> <span id="hot">---</span><br>
+<b class="red">COLD DIGITS:</b> <span id="cold">---</span><br>
+<b class="gold">MOST OVERDUE:</b> <span id="overdue">---</span>
+<div class="muted">
+A cold or overdue digit is not automatically more likely to appear next.
+</div>
+</div>
+</section>
 
-    <div id="bigDigit" class="big-digit">--</div>
+<section class="panel">
+<h2>EVEN / ODD BALANCE</h2>
+<div class="cards">
+<div class="metric"><small>EVEN</small><strong id="evenpct">0%</strong></div>
+<div class="metric"><small>ODD</small><strong id="oddpct">0%</strong></div>
+<div class="metric"><small>EVEN COUNT</small><strong id="evencount">0</strong></div>
+<div class="metric"><small>ODD COUNT</small><strong id="oddcount">0</strong></div>
+</div>
+</section>
 
-    <div id="digitTime" class="section-label">
-        Waiting for market data...
-    </div>
+<section class="panel">
+<h2>TECHNICAL MARKET INTELLIGENCE</h2>
 
+<div class="cards">
+<div class="metric"><small>EMA 9</small><strong id="ema9">---</strong></div>
+<div class="metric"><small>EMA 21</small><strong id="ema21">---</strong></div>
+<div class="metric"><small>RSI · 14</small><strong id="rsi">---</strong></div>
+<div class="metric"><small>MOMENTUM · 20 TICKS</small><strong id="momentum">---</strong></div>
+<div class="metric"><small>SUPPORT · 50 TICKS</small><strong id="support">---</strong></div>
+<div class="metric"><small>RESISTANCE · 50 TICKS</small><strong id="resistance">---</strong></div>
+<div class="metric"><small>AVG ABS MOVEMENT</small><strong id="movement">---</strong></div>
+<div class="metric"><small>MARKET CONDITION</small><strong id="condition">---</strong></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>FREQUENCY & DIGIT TRANSITIONS</h2>
+
+<div class="split">
+<div class="metric">
+<small>TOP · LAST 100 TICKS</small>
+<strong id="top100">---</strong>
+</div>
+<div class="metric">
+<small>TOP · LAST 300 TICKS</small>
+<strong id="top300">---</strong>
+</div>
 </div>
 
-<!-- DIGIT DISTRIBUTION -->
+<div class="result" id="transitions">
+Collecting transition data...
+</div>
+</section>
 
-<div class="panel">
+<section class="panel">
+<h2>STATISTICAL OUTLOOK</h2>
 
-    <h2>DIGIT DISTRIBUTION (0–9)</h2>
-
-    <div class="digit-grid" id="digitGrid">
-
-    </div>
-
-    <div class="result-box">
-        <div>
-            <span class="green">HOT DIGITS:</span>
-            <span id="hotDigits">---</span>
-        </div>
-
-        <div>
-            <span class="red">COLD DIGITS:</span>
-            <span id="coldDigits">---</span>
-        </div>
-
-        <div>
-            <span class="yellow">OVERDUE DIGITS:</span>
-            <span id="overdueDigits">---</span>
-        </div>
-
-    </div>
-
+<div class="predictions">
+<div class="prediction">
+<small>TOP CANDIDATE</small>
+<strong id="out5">---</strong>
+<small id="out5sub">Need data</small>
 </div>
 
-<!-- EVEN ODD -->
-
-<div class="panel">
-
-    <h2>EVEN / ODD ANALYSIS</h2>
-
-    <div class="grid">
-
-        <div class="metric">
-            <small>EVEN DIGITS</small>
-            <strong id="evenPercent" class="cyan">0%</strong>
-        </div>
-
-        <div class="metric">
-            <small>ODD DIGITS</small>
-            <strong id="oddPercent" class="purple">0%</strong>
-        </div>
-
-        <div class="metric">
-            <small>EVEN COUNT</small>
-            <strong id="evenCount">0</strong>
-        </div>
-
-        <div class="metric">
-            <small>ODD COUNT</small>
-            <strong id="oddCount">0</strong>
-        </div>
-
-    </div>
-
+<div class="prediction">
+<small>TOP 2 CANDIDATES</small>
+<strong id="out10">---</strong>
+<small id="out10sub">Need data</small>
 </div>
 
-<!-- TECHNICAL ANALYSIS -->
-
-<div class="panel">
-
-    <h2>TECHNICAL MARKET INTELLIGENCE</h2>
-
-    <div class="grid">
-
-        <div class="metric">
-            <small>EMA 9</small>
-            <strong id="ema9">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>EMA 21</small>
-            <strong id="ema21">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>RSI (14)</small>
-            <strong id="rsi">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>MARKET MOMENTUM</small>
-            <strong id="momentum">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>SUPPORT</small>
-            <strong id="support">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>RESISTANCE</small>
-            <strong id="resistance">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>VOLATILITY</small>
-            <strong id="volatility">---</strong>
-        </div>
-
-        <div class="metric">
-            <small>MARKET CONDITION</small>
-            <strong id="condition">---</strong>
-        </div>
-
-    </div>
-
+<div class="prediction">
+<small>TOP 3 CANDIDATES</small>
+<strong id="out20">---</strong>
+<small id="out20sub">Need data</small>
+</div>
 </div>
 
-<!-- MARKOV -->
-
-<div class="panel">
-
-    <h2>DIGIT TRANSITION INTELLIGENCE</h2>
-
-    <div class="result-box" id="transitionResult">
-        Collecting sufficient tick data...
-    </div>
-
+<div id="candidate" class="result">
+Collecting at least 100 ticks for the statistical model.
 </div>
 
-<!-- PREDICTIONS -->
+<div class="muted">
+These are ranked historical model scores, not guaranteed predictions for the next 5, 10 or 20 ticks.
+</div>
+</section>
 
-<div class="panel">
+<section class="panel">
+<h2>LIVE MODEL VALIDATION</h2>
 
-    <h2>STATISTICAL OUTLOOK</h2>
-
-    <div class="prediction-grid">
-
-        <div class="prediction">
-            <small>NEXT 5 TICKS</small>
-            <strong id="outlook5">---</strong>
-            <small id="outlook5detail">Insufficient data</small>
-        </div>
-
-        <div class="prediction">
-            <small>NEXT 10 TICKS</small>
-            <strong id="outlook10">---</strong>
-            <small id="outlook10detail">Insufficient data</small>
-        </div>
-
-        <div class="prediction">
-            <small>NEXT 20 TICKS</small>
-            <strong id="outlook20">---</strong>
-            <small id="outlook20detail">Insufficient data</small>
-        </div>
-
-    </div>
-
-    <div class="result-box" id="candidateResult">
-        Potential digit candidates will appear here.
-    </div>
-
+<div class="cards">
+<div class="metric"><small>TESTED FORECASTS</small><strong id="tested">0</strong></div>
+<div class="metric"><small>TOP-DIGIT HITS</small><strong id="hits">0</strong></div>
+<div class="metric"><small>TOP-DIGIT HIT RATE</small><strong id="hitrate">---</strong></div>
+<div class="metric"><small>UNIFORM BASELINE</small><strong>10%</strong></div>
 </div>
 
-<!-- SCANNER -->
+<div id="validationnote" class="result">
+The one-step test starts after enough historical ticks have loaded.
+</div>
+</section>
 
-<div class="panel">
+<section class="panel">
+<h2>INTELLIGENT MARKET SCAN</h2>
+<div id="scanresult" class="result">
+Connect to a market, collect data and run a scan.
+</div>
+</section>
 
-    <h2>INTELLIGENT MARKET SCANNER</h2>
+<section class="panel">
+<h2>SCAN HISTORY</h2>
 
-    <button class="primary scan-button" onclick="runScan()">
-        ⚡ RUN SCAN
-    </button>
-
-    <div id="scanResult" class="result-box">
-        Waiting for scan...
-    </div>
-
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>TIME</th>
+<th>MARKET</th>
+<th>DIGIT</th>
+<th>TREND</th>
+<th>RSI</th>
+<th>CANDIDATES</th>
+<th>ASSESSMENT</th>
+</tr>
+</thead>
+<tbody id="history"></tbody>
+</table>
 </div>
 
-<!-- HISTORY -->
+<button id="clearhistory" style="margin-top:10px">CLEAR HISTORY</button>
+</section>
 
-<div class="panel">
-
-    <h2>ANALYSIS HISTORY</h2>
-
-    <div class="history-wrap">
-
-        <table>
-            <thead>
-                <tr>
-                    <th>TIME</th>
-                    <th>MARKET</th>
-                    <th>LAST DIGIT</th>
-                    <th>TREND</th>
-                    <th>RSI</th>
-                    <th>OUTLOOK</th>
-                </tr>
-            </thead>
-
-            <tbody id="historyTable">
-            </tbody>
-
-        </table>
-
-    </div>
-
-    <button onclick="clearHistory()" style="margin-top:12px">
-        CLEAR HISTORY
-    </button>
-
+<section class="panel">
+<h2>MODEL TRANSPARENCY</h2>
+<div class="result">
+• One selected market is analysed at a time.<br>
+• Frequency, gaps and transitions describe past observations.<br>
+• Candidate windows are ranking views, not exact forecasts.<br>
+• Confidence means sample depth and indicator agreement, not probability of winning.<br>
+• Synthetic index digits can be random-like. No indicator guarantees an outcome.<br>
+• This is an analysis tool only. It does not place trades.
 </div>
+</section>
 
-<div class="panel">
+</main>
 
-    <h2>ANALYSER INFORMATION</h2>
-
-    <div class="result-box">
-
-        <p>Data source: Deriv public market WebSocket.</p>
-
-        <p>Analysis type: Statistical and technical.</p>
-
-        <p>Trading mode: Analysis only.</p>
-
-        <p>Predictions are experimental statistical estimates,
-        not guaranteed outcomes.</p>
-
-        <p>Minimum recommended analysis sample: 100 ticks.</p>
-
-    </div>
-
-</div>
-
+<div class="dock">
+<span id="docklabel">Selected market</span>
+<button id="scan" class="primary">⚡ RUN SCAN</button>
 </div>
 
 <footer>
-    DERIV INTELLIGENT MARKET ANALYSER V1.0<br>
-    Independent analytical tool — Not a trading signal provider.
+DERIV INTELLIGENT MARKET ANALYSER V2.0 · Analysis only · Not financial advice
 </footer>
 
-
 <script>
-
-// ========================================
-// 1. GLOBAL VARIABLES
-// ========================================
-
-let ws = null;
-
-let prices = [];
-let digits = [];
-
-let tickCount = 0;
-let currentMarket = "1HZ10V";
-
-let currentAnalysis = null;
-
-let lastQuoteTime = null;
-
-let historyRecords = JSON.parse(
-    localStorage.getItem("derivAnalysisHistory") || "[]"
-);
-
-const MAX_TICKS = 1000;
-
-
-// ========================================
-// 2. DOM ELEMENTS
-// ========================================
+"use strict";
 
 const $ = id => document.getElementById(id);
 
+const WS_URL = "wss://api.derivws.com/trading/v1/options/ws/public";
 
-// ========================================
-// 3. DIGIT DISPLAY
-// ========================================
+const MAX_TICKS = 1200;
+const MIN_SAMPLE = 100;
 
-function extractDigit(price, decimals) {
+let socket = null;
+let prices = [];
+let digits = [];
+let times = [];
+let pip = 2;
+let market = $("market").value;
+let pendingForecast = null;
+let manualClose = false;
 
-    const formatted = Number(price).toFixed(
-        Math.min(Math.max(decimals,0),10)
-    );
+let validation = {tested:0,hits:0};
+let history = [];
 
-    const clean = formatted.replace(".", "");
+try {
+history = JSON.parse(localStorage.getItem("derivV2History") || "[]");
+if (!Array.isArray(history)) history = [];
+} catch(e) { history = []; }
 
-    return Number(clean.slice(-1));
+try {
+validation = JSON.parse(
+localStorage.getItem("derivV2Validation") ||
+'{"tested":0,"hits":0}'
+);
+} catch(e) {
+validation = {tested:0,hits:0};
 }
 
-
-function displayDigit(digit) {
-
-    const big = $("bigDigit");
-
-    big.textContent = digit;
-
-    big.classList.remove("pop");
-
-    void big.offsetWidth;
-
-    big.classList.add("pop");
-
-    $("lastDigitMetric").textContent = digit;
-
-    $("digitTime").textContent =
-        "Last update: " + new Date().toLocaleTimeString();
-
+function setStatus(message,color="#ffd166") {
+$("status").textContent = "● " + message;
+$("status").style.color = color;
 }
 
-
-// ========================================
-// 4. CONNECTION MANAGEMENT
-// ========================================
-
-function updateStatus(message, color) {
-
-    $("connectionStatus").textContent = "● " + message;
-
-    $("connectionStatus").style.color = color;
-
+function priceText(value) {
+return Number(value).toFixed(
+Math.max(0,Math.min(10,pip))
+);
 }
 
-
-function connectMarket() {
-
-    disconnectMarket();
-
-    currentMarket = $("marketSelect").value;
-
-    updateStatus("CONNECTING...", "#ffc857");
-
-    const endpoint =
-        "wss://api.derivws.com/trading/v1/options/ws/public";
-
-    try {
-
-        ws = new WebSocket(endpoint);
-
-    } catch(error) {
-
-        updateStatus("CONNECTION FAILED", "#ff5470");
-
-        return;
-
-    }
-
-    ws.onopen = function() {
-
-        updateStatus("CONNECTED", "#00e69a");
-
-        // Request historical ticks.
-
-        ws.send(JSON.stringify({
-
-            ticks_history: currentMarket,
-            count: 500,
-            end: "latest",
-            style: "ticks",
-            req_id: 1
-
-        }));
-
-    };
-
-
-    ws.onmessage = function(event) {
-
-        let data;
-
-        try {
-
-            data = JSON.parse(event.data);
-
-        } catch(error) {
-
-            return;
-
-        }
-
-        if(data.error) {
-
-            updateStatus("API ERROR", "#ff5470");
-
-            $("scanResult").textContent =
-                data.error.message || "Market data error";
-
-            return;
-
-        }
-
-        // Historical market data.
-
-        if(data.msg_type === "history") {
-
-            loadHistory(data.history, data.pip_size);
-
-            // Start live tick stream.
-
-            if(ws && ws.readyState === WebSocket.OPEN) {
-
-                ws.send(JSON.stringify({
-
-                    ticks: currentMarket,
-                    subscribe: 1,
-                    req_id: 2
-
-                }));
-
-            }
-
-        }
-
-
-        // Live tick updates.
-
-        if(data.msg_type === "tick") {
-
-            const tick = data.tick;
-
-            if(!tick) return;
-
-            if(tick.symbol && tick.symbol !== currentMarket) {
-                return;
-            }
-
-            processTick(
-                tick.quote,
-                tick.pip_size
-            );
-
-        }
-
-    };
-
-
-    ws.onerror = function() {
-
-        updateStatus("CONNECTION ERROR", "#ff5470");
-
-    };
-
-
-    ws.onclose = function() {
-
-        updateStatus("DISCONNECTED", "#ffc857");
-
-    };
-
+function digitOf(value,precision) {
+const text = Number(value).toFixed(
+Math.max(0,Math.min(10,precision || 0))
+);
+return Number(text.replace(".","").slice(-1));
 }
 
+function flashDigit(digit) {
+$("bigdigit").textContent = digit;
+$("lastdigit").textContent = digit;
+$("updated").textContent =
+"Updated " + new Date().toLocaleTimeString();
 
-function disconnectMarket() {
-
-    if(ws) {
-
-        ws.onclose = null;
-
-        ws.close();
-
-        ws = null;
-
-    }
-
-    updateStatus("DISCONNECTED", "#ffc857");
-
+const element = $("bigdigit");
+element.classList.remove("pop");
+void element.offsetWidth;
+element.classList.add("pop");
 }
 
+function saveValidation() {
+try {
+localStorage.setItem(
+"derivV2Validation",
+JSON.stringify(validation)
+);
+} catch(e) {}
 
-// ========================================
-// 5. LOAD HISTORICAL DATA
-// ========================================
-
-function loadHistory(history, pipSize) {
-
-    if(!history || !history.prices) return;
-
-    prices = [];
-    digits = [];
-
-    tickCount = 0;
-
-    const decimals = Number.isInteger(pipSize)
-        ? pipSize
-        : 2;
-
-    history.prices.forEach(price => {
-
-        const value = Number(price);
-
-        if(!Number.isFinite(value)) return;
-
-        prices.push(value);
-
-        digits.push(extractDigit(value,decimals));
-
-    });
-
-    if(prices.length > MAX_TICKS) {
-
-        prices = prices.slice(-MAX_TICKS);
-
-        digits = digits.slice(-MAX_TICKS);
-
-    }
-
-    tickCount = prices.length;
-
-    if(prices.length) {
-
-        const last = prices[prices.length-1];
-
-        $("lastPrice").textContent = last.toFixed(decimals);
-
-        displayDigit(digits[digits.length-1]);
-
-    }
-
-    updateAll();
-
+renderValidation();
 }
 
+function renderValidation() {
+$("tested").textContent = validation.tested;
+$("hits").textContent = validation.hits;
 
-// ========================================
-// 6. PROCESS LIVE TICKS
-// ========================================
+$("hitrate").textContent =
+validation.tested
+? (100 * validation.hits / validation.tested).toFixed(1) + "%"
+: "---";
 
-function processTick(price, pipSize) {
-
-    const value = Number(price);
-
-    if(!Number.isFinite(value)) return;
-
-    const decimals = Number.isInteger(pipSize)
-        ? pipSize
-        : 2;
-
-    // Ignore duplicate historical/live boundary tick.
-
-    const last = prices[prices.length-1];
-
-    if(last === value) return;
-
-    prices.push(value);
-
-    const digit = extractDigit(value,decimals);
-
-    digits.push(digit);
-
-    if(prices.length > MAX_TICKS) {
-
-        prices.shift();
-
-        digits.shift();
-
-    }
-
-    tickCount++;
-
-    lastQuoteTime = Date.now();
-
-    $("lastPrice").textContent = value.toFixed(decimals);
-
-    displayDigit(digit);
-
-    $("tickCount").textContent = prices.length;
-
-    updateAll();
-
+$("validationnote").textContent =
+validation.tested
+? `Top-ranked digit hits: ${validation.hits} from ${validation.tested} one-step tests. Compare with the 10% uniform baseline over a large sample.`
+: "The one-step test starts after enough historical ticks have loaded.";
 }
 
+function disconnect() {
+manualClose = true;
 
-// ========================================
-// 7. DIGIT STATISTICS
-// ========================================
+if(socket) {
+const old = socket;
+socket = null;
+old.onclose = null;
 
-function digitStatistics() {
-
-    const counts = Array(10).fill(0);
-
-    digits.forEach(d => {
-
-        counts[d]++;
-
-    });
-
-    const total = digits.length;
-
-    const percentages = counts.map(c =>
-
-        total ? (c/total)*100 : 0
-
-    );
-
-    return {
-        counts,
-        percentages,
-        total
-    };
-
+try { old.close(); } catch(e) {}
 }
 
-
-function updateDigitGrid() {
-
-    const stats = digitStatistics();
-
-    const grid = $("digitGrid");
-
-    grid.innerHTML = "";
-
-    const max = Math.max(...stats.counts);
-
-    stats.counts.forEach((count,digit) => {
-
-        const percentage = stats.percentages[digit];
-
-        const box = document.createElement("div");
-
-        box.className = "digit-box";
-
-        if(count === max && count > 0) {
-
-            box.classList.add("hot");
-
-        }
-
-        if(count === Math.min(...stats.counts)) {
-
-            box.classList.add("cold");
-
-        }
-
-        box.innerHTML = `
-
-            <div class="number">${digit}</div>
-
-            <small>${percentage.toFixed(1)}%</small>
-
-            <small>${count} hits</small>
-
-            <div class="bar">
-
-                <div class="bar-fill"
-                style="width:${percentage}%"></div>
-
-            </div>
-
-        `;
-
-        grid.appendChild(box);
-
-    });
-
-    const sorted = [...Array(10).keys()].sort(
-
-        (a,b) => stats.counts[b]-stats.counts[a]
-
-    );
-
-    $("hotDigits").textContent = sorted.slice(0,3).join(", ");
-
-    $("coldDigits").textContent = sorted.slice(-3).reverse().join(", ");
-
-    // Ticks since each digit last appeared.
-
-    const overdue = Array(10).fill(0);
-
-    for(let d=0; d<10; d++) {
-
-        const index = digits.lastIndexOf(d);
-
-        overdue[d] = index === -1
-            ? digits.length
-            : digits.length-1-index;
-
-    }
-
-    const overdueSorted = [...Array(10).keys()].sort(
-
-        (a,b) => overdue[b]-overdue[a]
-
-    );
-
-    $("overdueDigits").textContent =
-
-        overdueSorted.slice(0,3).join(", ");
-
+setStatus("DISCONNECTED");
 }
 
+function resetMarket() {
+prices = [];
+digits = [];
+times = [];
+pendingForecast = null;
 
-// ========================================
-// 8. EVEN / ODD ANALYSIS
-// ========================================
+validation = {tested:0,hits:0};
+saveValidation();
 
-function updateEvenOdd() {
+$("price").textContent = "---";
+$("lastdigit").textContent = "---";
+$("bigdigit").textContent = "--";
+$("ticks").textContent = "0";
+$("epoch").textContent = "---";
+$("sample").textContent = "WAITING";
+$("active").textContent = market;
+$("scanresult").textContent = "Waiting for market history...";
 
-    const even = digits.filter(d => d%2===0).length;
-
-    const odd = digits.length-even;
-
-    const total = digits.length || 1;
-
-    $("evenCount").textContent = even;
-
-    $("oddCount").textContent = odd;
-
-    $("evenPercent").textContent =
-
-        (even/total*100).toFixed(1)+"%";
-
-    $("oddPercent").textContent =
-
-        (odd/total*100).toFixed(1)+"%";
-
+update();
 }
 
+function connect() {
+disconnect();
 
-// ========================================
-// 9. EMA CALCULATION
-// ========================================
+manualClose = false;
+market = $("market").value;
 
-function calculateEMA(data,period) {
+resetMarket();
 
-    if(data.length < period) return null;
+$("docklabel").textContent = market;
 
-    const multiplier = 2/(period+1);
+setStatus("CONNECTING...");
 
-    let ema = data.slice(0,period).reduce(
-
-        (a,b)=>a+b,0
-
-    )/period;
-
-    for(let i=period;i<data.length;i++) {
-
-        ema = (data[i]-ema)*multiplier+ema;
-
-    }
-
-    return ema;
-
+try {
+socket = new WebSocket(WS_URL);
+} catch(e) {
+setStatus("CONNECTION FAILED","#ff5b75");
+return;
 }
 
+const currentSocket = socket;
 
-// ========================================
-// 10. RSI CALCULATION
-// ========================================
+currentSocket.onopen = () => {
+if(socket !== currentSocket) return;
 
-function calculateRSI(data,period=14) {
+setStatus("CONNECTED · LOADING HISTORY","#00e69a");
 
-    if(data.length <= period) return null;
+currentSocket.send(JSON.stringify({
+ticks_history: market,
+count: 1000,
+end: "latest",
+style: "ticks",
+req_id: 1
+}));
+};
 
-    let gains = 0;
+currentSocket.onmessage = event => {
+if(socket !== currentSocket) return;
 
-    let losses = 0;
+let data;
 
-    for(let i=data.length-period;i<data.length;i++) {
-
-        const change = data[i]-data[i-1];
-
-        if(change>0) gains+=change;
-
-        else losses+=Math.abs(change);
-
-    }
-
-    const avgGain = gains/period;
-
-    const avgLoss = losses/period;
-
-    if(avgLoss===0) {
-
-        return avgGain===0 ? 50 : 100;
-
-    }
-
-    const rs = avgGain/avgLoss;
-
-    return 100-(100/(1+rs));
-
+try {
+data = JSON.parse(event.data);
+} catch(e) {
+return;
 }
 
-
-// ========================================
-// 11. TREND ANALYSIS
-// ========================================
-
-function analyseTrend() {
-
-    const ema9 = calculateEMA(prices,9);
-
-    const ema21 = calculateEMA(prices,21);
-
-    if(ema9===null || ema21===null) {
-
-        return {
-            trend:"INSUFFICIENT DATA",
-            ema9,
-            ema21
-        };
-
-    }
-
-    const difference = ema9-ema21;
-
-    const tolerance = Math.abs(ema21)*0.00001;
-
-    let trend = "SIDEWAYS";
-
-    if(difference>tolerance) trend="UPTREND";
-
-    if(difference< -tolerance) trend="DOWNTREND";
-
-    return {
-        trend,
-        ema9,
-        ema21
-    };
-
+if(data.error) {
+setStatus("API ERROR","#ff5b75");
+$("scanresult").textContent = data.error.message || "Market data error";
+return;
 }
 
+if(data.msg_type === "history" && data.history) {
+loadHistory(data.history,data.pip_size);
 
-// ========================================
-// 12. SUPPORT AND RESISTANCE
-// ========================================
+if(currentSocket.readyState === WebSocket.OPEN) {
+currentSocket.send(JSON.stringify({
+ticks: market,
+subscribe: 1,
+req_id: 2
+}));
 
-function supportResistance() {
-
-    if(prices.length<20) {
-
-        return {
-            support:null,
-            resistance:null
-        };
-
-    }
-
-    const recent = prices.slice(-50);
-
-    return {
-
-        support:Math.min(...recent),
-
-        resistance:Math.max(...recent)
-
-    };
-
+setStatus("LIVE STREAM ACTIVE","#00e69a");
+}
 }
 
+if(data.msg_type === "tick" && data.tick) {
+const tick = data.tick;
 
-// ========================================
-// 13. MOMENTUM AND VOLATILITY
-// ========================================
+if(tick.symbol && tick.symbol !== market) return;
 
-function marketMovement() {
+processTick(tick.quote,tick.pip_size,tick.epoch);
+}
+};
 
-    if(prices.length<20) {
+currentSocket.onerror = () => {
+if(socket === currentSocket) {
+setStatus("CONNECTION ERROR","#ff5b75");
+}
+};
 
-        return {
-            momentum:"INSUFFICIENT DATA",
-            volatility:"INSUFFICIENT DATA",
-            condition:"INSUFFICIENT DATA"
-        };
+currentSocket.onclose = () => {
+if(socket === currentSocket) {
+socket = null;
 
-    }
-
-    const recent = prices.slice(-20);
-
-    const first = recent[0];
-
-    const last = recent[recent.length-1];
-
-    const movement = last-first;
-
-    let momentum = "NEUTRAL";
-
-    if(movement>0) momentum="POSITIVE";
-
-    if(movement<0) momentum="NEGATIVE";
-
-    const changes = [];
-
-    for(let i=1;i<recent.length;i++) {
-
-        changes.push(
-
-            Math.abs(recent[i]-recent[i-1])
-
-        );
-
-    }
-
-    const average = changes.reduce((a,b)=>a+b,0)/changes.length;
-
-    const condition = average>0 ? "ACTIVE" : "QUIET";
-
-    return {
-
-        momentum,
-
-        volatility:average.toFixed(5),
-
-        condition
-
-    };
-
+if(!manualClose) {
+setStatus("CONNECTION CLOSED","#ffd166");
+}
+}
+};
 }
 
+function loadHistory(data,precision) {
+if(!Array.isArray(data.prices)) return;
 
-// ========================================
-// 14. MARKOV DIGIT TRANSITIONS
-// ========================================
+pip = Number.isInteger(precision) ? precision : 2;
 
-function analyseTransitions() {
+prices = [];
+digits = [];
+times = [];
 
-    if(digits.length<30) {
+const timestamps = Array.isArray(data.times)
+? data.times
+: [];
 
-        return "Collecting more ticks for transition analysis.";
+data.prices.forEach((price,index) => {
+const value = Number(price);
 
-    }
+if(!Number.isFinite(value)) return;
 
-    const lastDigit = digits[digits.length-1];
-
-    const transitions = Array(10).fill(0);
-
-    let total = 0;
-
-    for(let i=0;i<digits.length-1;i++) {
-
-        if(digits[i]===lastDigit) {
-
-            transitions[digits[i+1]]++;
-
-            total++;
-
-        }
-
-    }
-
-    if(total===0) {
-
-        return "No historical transitions found for the current digit.";
-
-    }
-
-    const sorted = [...Array(10).keys()].sort(
-
-        (a,b)=>transitions[b]-transitions[a]
-
-    );
-
-    const results = sorted.slice(0,3).map(d=>{
-
-        return `${d} (${(transitions[d]/total*100).toFixed(1)}%)`;
-
-    });
-
-    return `After digit ${lastDigit}, historical next-digit frequencies: ${results.join(" | ")}. Sample size: ${total}.`;
-
-}
-
-
-// ========================================
-// 15. STATISTICAL OUTLOOK
-// ========================================
-
-function calculateOutlook() {
-
-    if(digits.length<100) {
-
-        $("outlook5").textContent="WAIT";
-
-        $("outlook10").textContent="WAIT";
-
-        $("outlook20").textContent="WAIT";
-
-        $("candidateResult").textContent =
-
-            "At least 100 historical ticks are required for the initial statistical outlook.";
-
-        return null;
-
-    }
-
-    const stats = digitStatistics();
-
-    const sorted = [...Array(10).keys()].sort(
-
-        (a,b)=>stats.counts[b]-stats.counts[a]
-
-    );
-
-    const top = sorted.slice(0,3);
-
-    const even = digits.filter(d=>d%2===0).length;
-
-    const evenPct = even/digits.length*100;
-
-    const oddPct = 100-evenPct;
-
-    // Historical frequencies, not guaranteed future probabilities.
-
-    $("outlook5").textContent = top[0];
-
-    $("outlook10").textContent = top.slice(0,2).join(" / ");
-
-    $("outlook20").textContent = top.join(" / ");
-
-    $("outlook5detail").textContent =
-
-        stats.percentages[top[0]].toFixed(1)+"% historical frequency";
-
-    $("outlook10detail").textContent =
-
-        "Top two historical digits";
-
-    $("outlook20detail").textContent =
-
-        "Top three historical digits";
-
-    $("candidateResult").innerHTML = `
-
-        <strong>TOP HISTORICAL CANDIDATES</strong><br>
-
-        ${top.map(d=>d+" : "+stats.percentages[d].toFixed(2)+"%").join("<br>")}
-
-        <br><br>
-
-        Historical even frequency: ${evenPct.toFixed(2)}%
-
-        <br>
-
-        Historical odd frequency: ${oddPct.toFixed(2)}%
-
-        <br><br>
-
-        These are historical distributions, not predictions of exact future digits.
-
-    `;
-
-    return {
-        top,
-        evenPct,
-        oddPct
-    };
-
-}
-
-
-// ========================================
-// 16. UPDATE TECHNICAL DASHBOARD
-// ========================================
-
-function updateTechnical() {
-
-    const trend = analyseTrend();
-
-    const rsi = calculateRSI(prices);
-
-    const sr = supportResistance();
-
-    const movement = marketMovement();
-
-    $("trendMetric").textContent = trend.trend;
-
-    $("trendMetric").className =
-
-        trend.trend==="UPTREND" ? "green" :
-
-        trend.trend==="DOWNTREND" ? "red" : "yellow";
-
-    $("ema9").textContent = trend.ema9===null
-
-        ? "---" : trend.ema9.toFixed(5);
-
-    $("ema21").textContent = trend.ema21===null
-
-        ? "---" : trend.ema21.toFixed(5);
-
-    $("rsi").textContent = rsi===null
-
-        ? "---" : rsi.toFixed(2);
-
-    $("momentum").textContent = movement.momentum;
-
-    $("support").textContent = sr.support===null
-
-        ? "---" : sr.support.toFixed(5);
-
-    $("resistance").textContent = sr.resistance===null
-
-        ? "---" : sr.resistance.toFixed(5);
-
-    $("volatility").textContent = movement.volatility;
-
-    $("condition").textContent = movement.condition;
-
-    $("transitionResult").textContent =
-
-        analyseTransitions();
-
-}
-
-
-// ========================================
-// 17. UPDATE EVERYTHING
-// ========================================
-
-function updateAll() {
-
-    $("tickCount").textContent = prices.length;
-
-    updateDigitGrid();
-
-    updateEvenOdd();
-
-    updateTechnical();
-
-    calculateOutlook();
-
-}
-
-
-// ========================================
-// 18. RUN SCAN
-// ========================================
-
-function runScan() {
-
-    if(prices.length<100) {
-
-        $("scanResult").innerHTML = `
-
-            <span class="yellow">INSUFFICIENT DATA</span><br>
-
-            Current sample: ${prices.length} ticks.<br>
-
-            Minimum required: 100 ticks.<br>
-
-            Continue collecting market data.
-
-        `;
-
-        return;
-
-    }
-
-    const trend = analyseTrend();
-
-    const rsi = calculateRSI(prices);
-
-    const sr = supportResistance();
-
-    const movement = marketMovement();
-
-    const stats = digitStatistics();
-
-    const outlook = calculateOutlook();
-
-    const latestDigit = digits[digits.length-1];
-
-    let momentum = "NEUTRAL";
-
-    if(rsi!==null && rsi>55) momentum="BULLISH MOMENTUM";
-
-    if(rsi!==null && rsi<45) momentum="BEARISH MOMENTUM";
-
-    let agreement = 0;
-
-    if(trend.trend==="UPTREND" && momentum==="BULLISH MOMENTUM") {
-
-        agreement++;
-
-    }
-
-    if(trend.trend==="DOWNTREND" && momentum==="BEARISH MOMENTUM") {
-
-        agreement++;
-
-    }
-
-    let direction = "MIXED / SIDEWAYS";
-
-    if(agreement>0 && trend.trend==="UPTREND") {
-
-        direction="BULLISH AGREEMENT";
-
-    }
-
-    if(agreement>0 && trend.trend==="DOWNTREND") {
-
-        direction="BEARISH AGREEMENT";
-
-    }
-
-    let qualification =
-
-        prices.length>=100 &&
-
-        trend.trend!=="INSUFFICIENT DATA" &&
-
-        rsi!==null;
-
-    const report = {
-
-        market:currentMarket,
-
-        time:new Date().toLocaleString(),
-
-        digit:latestDigit,
-
-        trend:trend.trend,
-
-        rsi:rsi,
-
-        direction:direction,
-
-        top:outlook.top
-
-    };
-
-    currentAnalysis=report;
-
-    $("scanResult").innerHTML = `
-
-        <h3>MARKET ANALYSIS REPORT</h3>
-
-        <strong class="cyan">${currentMarket}</strong><br>
-
-        Latest digit: <strong>${latestDigit}</strong><br>
-
-        Sample size: ${prices.length} ticks<br><br>
-
-        <strong>MARKET STRUCTURE</strong><br>
-
-        Trend: ${trend.trend}<br>
-
-        Momentum: ${momentum}<br>
-
-        EMA 9: ${trend.ema9.toFixed(5)}<br>
-
-        EMA 21: ${trend.ema21.toFixed(5)}<br>
-
-        RSI: ${rsi.toFixed(2)}<br>
-
-        Support: ${sr.support.toFixed(5)}<br>
-
-        Resistance: ${sr.resistance.toFixed(5)}<br>
-
-        Average movement: ${movement.volatility}<br><br>
-
-        <strong>DIGIT INTELLIGENCE</strong><br>
-
-        Top historical digits: ${outlook.top.join(", ")}<br>
-
-        Direction assessment: ${direction}<br><br>
-
-        <strong class="yellow">
-
-        ${qualification
-
-            ? "ANALYSIS COMPLETED — REVIEW THE EVIDENCE"
-
-            : "NO QUALIFIED SIGNAL"}
-
-        </strong><br>
-
-        <small>
-
-        This is a statistical market assessment, not a verified trading signal.
-
-        Historical frequency does not establish future probability.
-
-        </small>
-
-    `;
-
-    saveAnalysis(report);
-
-}
-
-
-// ========================================
-// 19. SAVE HISTORY
-// ========================================
-
-function saveAnalysis(report) {
-
-    historyRecords.unshift(report);
-
-    historyRecords = historyRecords.slice(0,50);
-
-    localStorage.setItem(
-
-        "derivAnalysisHistory",
-
-        JSON.stringify(historyRecords)
-
-    );
-
-    renderHistory();
-
-}
-
-
-function renderHistory() {
-
-    $("historyTable").innerHTML = "";
-
-    historyRecords.forEach(record=>{
-
-        const row = document.createElement("tr");
-
-        const values = [
-
-            record.time,
-
-            record.market,
-
-            record.digit,
-
-            record.trend,
-
-            record.rsi===null ? "---" : Number(record.rsi).toFixed(2),
-
-            record.direction
-
-        ];
-
-        values.forEach(value=>{
-
-            const cell = document.createElement("td");
-
-            cell.textContent = value;
-
-            row.appendChild(cell);
-
-        });
-
-        $("historyTable").appendChild(row);
-
-    });
-
-}
-
-
-function clearHistory() {
-
-    if(!confirm("Clear all saved analysis history?")) return;
-
-    historyRecords=[];
-
-    localStorage.removeItem("derivAnalysisHistory");
-
-    renderHistory();
-
-}
-
-
-// ========================================
-// 20. MARKET SWITCHING
-// ========================================
-
-$("marketSelect").addEventListener("change",function(){
-
-    prices=[];
-
-    digits=[];
-
-    tickCount=0;
-
-    $("lastPrice").textContent="---";
-
-    $("lastDigitMetric").textContent="---";
-
-    $("bigDigit").textContent="--";
-
-    $("tickCount").textContent="0";
-
-    $("scanResult").textContent="Market changed. Reconnecting...";
-
-    $("outlook5").textContent="---";
-
-    $("outlook10").textContent="---";
-
-    $("outlook20").textContent="---";
-
-    connectMarket();
-
+prices.push(value);
+digits.push(digitOf(value,pip));
+times.push(timestamps[index] ?? null);
 });
 
+if(prices.length > MAX_TICKS) {
+prices = prices.slice(-MAX_TICKS);
+digits = digits.slice(-MAX_TICKS);
+times = times.slice(-MAX_TICKS);
+}
 
-// ========================================
-// 21. INITIALISATION
-// ========================================
+if(prices.length) {
+$("price").textContent = priceText(prices.at(-1));
+flashDigit(digits.at(-1));
+$("epoch").textContent = times.at(-1) ?? "History";
+}
+
+$("sample").textContent =
+digits.length >= MIN_SAMPLE ? "READY" : "COLLECTING";
+
+update();
+}
+
+function countDigits(array) {
+const counts = Array(10).fill(0);
+
+array.forEach(digit => counts[digit]++);
+
+return counts;
+}
+
+function topDigits(array,count=3) {
+const counts = countDigits(array);
+
+return [...Array(10).keys()]
+.sort((a,b) => counts[b]-counts[a] || a-b)
+.slice(0,count)
+.map(digit => ({
+digit,
+count:counts[digit],
+percent:array.length
+? 100*counts[digit]/array.length
+: 0
+}));
+}
+
+/* Statistical frequency + smoothed transition model */
+
+function makeForecast(array) {
+if(array.length < MIN_SAMPLE) return null;
+
+const recent = array.slice(-300);
+const counts = countDigits(recent);
+
+const lastDigit = array.at(-1);
+const transitions = Array(10).fill(0);
+
+let transitionCount = 0;
+
+for(let i=0;i<array.length-1;i++) {
+if(array[i] === lastDigit) {
+transitions[array[i+1]]++;
+transitionCount++;
+}
+}
+
+/* Laplace smoothing */
+const scores = counts.map((count,index) => {
+const frequency = count / recent.length;
+
+const transition =
+(transitions[index] + 1) /
+(transitionCount + 10);
+
+return .65*frequency + .35*transition;
+});
+
+const total = scores.reduce((a,b)=>a+b,0);
+
+const normalized = scores.map(
+score => 100*score/total
+);
+
+const ranking = [...Array(10).keys()]
+.sort((a,b)=>normalized[b]-normalized[a])
+.map(digit=>({
+digit,
+score:normalized[digit]
+}));
+
+return {
+transitionCount,
+ranking
+};
+}
+
+/* Technical indicators */
+
+function calculateEMA(array,period) {
+if(array.length < period) return null;
+
+const multiplier = 2/(period+1);
+
+let value =
+array.slice(0,period).reduce((a,b)=>a+b,0)/period;
+
+for(let i=period;i<array.length;i++) {
+value = array[i]*multiplier + value*(1-multiplier);
+}
+
+return value;
+}
+
+function calculateRSI(array,period=14) {
+if(array.length <= period) return null;
+
+let gains = 0;
+let losses = 0;
+
+for(let i=array.length-period;i<array.length;i++) {
+const change = array[i]-array[i-1];
+
+if(change>0) gains+=change;
+else losses-=change;
+}
+
+if(losses===0) return gains===0 ? 50 : 100;
+
+const rs = (gains/period)/(losses/period);
+
+return 100-100/(1+rs);
+}
+
+function technicalAnalysis() {
+const ema9 = calculateEMA(prices,9);
+const ema21 = calculateEMA(prices,21);
+const rsi = calculateRSI(prices);
+
+const recent = prices.slice(-50);
+const changes = [];
+
+for(let i=1;i<recent.length;i++) {
+changes.push(Math.abs(recent[i]-recent[i-1]));
+}
+
+const averageMovement = changes.length
+? changes.reduce((a,b)=>a+b,0)/changes.length
+: null;
+
+let trend = "WAIT";
+
+if(ema9!==null && ema21!==null) {
+const difference = ema9-ema21;
+const tolerance = Math.abs(ema21)*0.0000001;
+
+trend =
+difference>tolerance ? "UPTREND" :
+difference< -tolerance ? "DOWNTREND" :
+"SIDEWAYS";
+}
+
+const movement = prices.length>=20
+? prices.at(-1)-prices.at(-20)
+: null;
+
+return {
+ema9,
+ema21,
+rsi,
+trend,
+momentum: movement===null
+? "WAIT"
+: movement>0
+? "POSITIVE"
+: movement<0
+? "NEGATIVE"
+: "NEUTRAL",
+support:recent.length>=20 ? Math.min(...recent) : null,
+resistance:recent.length>=20 ? Math.max(...recent) : null,
+averageMovement,
+condition:averageMovement===null
+? "WAIT"
+: averageMovement===0
+? "QUIET"
+: "ACTIVE"
+};
+}
+
+/* Process each incoming live tick */
+
+function processTick(quote,precision,epoch) {
+const value = Number(quote);
+
+if(!Number.isFinite(value)) return;
+
+pip = Number.isInteger(precision) ? precision : pip;
+
+const digit = digitOf(value,pip);
+
+/* Score the previous forecast against this newly arrived digit */
+if(digits.length>=MIN_SAMPLE && pendingForecast!==null) {
+validation.tested++;
+
+if(pendingForecast===digit) {
+validation.hits++;
+}
+
+saveValidation();
+}
+
+/* Create the forecast for the next tick */
+const forecast = makeForecast(digits);
+
+pendingForecast = forecast
+? forecast.ranking[0].digit
+: null;
+
+prices.push(value);
+digits.push(digit);
+times.push(epoch ?? null);
+
+if(prices.length>MAX_TICKS) {
+prices.shift();
+digits.shift();
+times.shift();
+}
+
+$("price").textContent = priceText(value);
+
+flashDigit(digit);
+
+$("ticks").textContent = digits.length;
+
+$("epoch").textContent = epoch
+? new Date(epoch*1000).toLocaleTimeString()
+: "Live";
+
+$("sample").textContent =
+digits.length>=MIN_SAMPLE ? "READY" : "COLLECTING";
+
+update();
+}
+
+/* Digit distribution */
+
+function updateDigitDistribution() {
+const counts = countDigits(digits);
+const total = digits.length;
+
+const maximum = Math.max(0,...counts);
+const minimum = total ? Math.min(...counts) : 0;
+
+$("digitgrid").innerHTML = "";
+
+counts.forEach((count,digit) => {
+const element = document.createElement("div");
+
+element.className = "digit";
+
+if(count===maximum && count>0) {
+element.classList.add("hot");
+}
+
+if(count===minimum) {
+element.classList.add("cold");
+}
+
+const percent = total ? 100*count/total : 0;
+
+element.innerHTML = `
+<b>${digit}</b>
+<small>${percent.toFixed(1)}% · ${count}</small>
+<div class="bar">
+<i style="width:${percent}%"></i>
+</div>
+`;
+
+$("digitgrid").appendChild(element);
+});
+
+const ranking = [...Array(10).keys()]
+.sort((a,b)=>counts[b]-counts[a]);
+
+$("hot").textContent = total
+? ranking.slice(0,3).join(", ")
+: "---";
+
+$("cold").textContent = total
+? ranking.slice(-3).reverse().join(", ")
+: "---";
+
+const gaps = Array(10).fill(total);
+
+for(let digit=0;digit<10;digit++) {
+const lastIndex = digits.lastIndexOf(digit);
+
+if(lastIndex>=0) {
+gaps[digit] = total-1-lastIndex;
+}
+}
+
+const overdue = [...Array(10).keys()]
+.sort((a,b)=>gaps[b]-gaps[a]);
+
+$("overdue").textContent = total
+? overdue.slice(0,3)
+.map(d=>`${d} (${gaps[d]} ticks)`)
+.join(" · ")
+: "---";
+}
+
+/* Update all dashboard sections */
+
+function update() {
+const total = digits.length;
+
+const even = digits.filter(d=>d%2===0).length;
+const odd = total-even;
+
+$("ticks").textContent = total;
+
+$("active").textContent = market;
+
+$("evencount").textContent = even;
+$("oddcount").textContent = odd;
+
+$("evenpct").textContent =
+(total ? 100*even/total : 0).toFixed(1)+"%";
+
+$("oddpct").textContent =
+(total ? 100*odd/total : 0).toFixed(1)+"%";
+
+updateDigitDistribution();
+
+const t = technicalAnalysis();
+
+$("trend").textContent = t.trend;
+
+$("trend").className =
+t.trend==="UPTREND" ? "green" :
+t.trend==="DOWNTREND" ? "red" :
+"gold";
+
+$("ema9").textContent =
+t.ema9===null ? "---" : priceText(t.ema9);
+
+$("ema21").textContent =
+t.ema21===null ? "---" : priceText(t.ema21);
+
+$("rsi").textContent =
+t.rsi===null ? "---" : t.rsi.toFixed(2);
+
+$("momentum").textContent = t.momentum;
+
+$("support").textContent =
+t.support===null ? "---" : priceText(t.support);
+
+$("resistance").textContent =
+t.resistance===null ? "---" : priceText(t.resistance);
+
+$("movement").textContent =
+t.averageMovement===null
+? "---"
+: t.averageMovement.toFixed(5);
+
+$("condition").textContent = t.condition;
+
+/* Rolling frequency */
+
+const shortWindow = digits.slice(-100);
+const mediumWindow = digits.slice(-300);
+
+$("top100").textContent = shortWindow.length
+? topDigits(shortWindow)
+.map(x=>`${x.digit} ${x.percent.toFixed(0)}%`)
+.join(" · ")
+: "---";
+
+$("top300").textContent = mediumWindow.length
+? topDigits(mediumWindow)
+.map(x=>`${x.digit} ${x.percent.toFixed(0)}%`)
+.join(" · ")
+: "---";
+
+const forecast = makeForecast(digits);
+
+if(!forecast) {
+$("transitions").textContent =
+`Need ${MIN_SAMPLE} ticks. Current sample: ${total}.`;
+
+$("candidate").textContent =
+`Collecting data: ${total}/${MIN_SAMPLE} ticks.`;
+
+["out5","out10","out20"].forEach(
+id => $(id).textContent="WAIT"
+);
+
+return;
+}
+
+/* Transition analysis */
+
+$("transitions").innerHTML = `
+Latest digit: <b>${digits.at(-1)}</b><br>
+Observed transitions from this digit:
+<b>${forecast.transitionCount}</b><br>
+Top model scores:
+<b>
+${forecast.ranking.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`)
+.join(" · ")}
+</b><br>
+<span class="muted">
+65% rolling frequency + 35% smoothed transition distribution.
+</span>
+`;
+
+/* Candidate rankings */
+
+const ranking = forecast.ranking;
+
+$("out5").textContent = ranking[0].digit;
+$("out5sub").textContent =
+ranking[0].score.toFixed(1)+" model score";
+
+$("out10").textContent =
+ranking.slice(0,2).map(x=>x.digit).join(" / ");
+
+$("out10sub").textContent =
+ranking.slice(0,2)
+.map(x=>x.score.toFixed(1)+"%")
+.join(" · ");
+
+$("out20").textContent =
+ranking.slice(0,3).map(x=>x.digit).join(" / ");
+
+$("out20sub").textContent =
+ranking.slice(0,3)
+.map(x=>x.score.toFixed(1)+"%")
+.join(" · ");
+
+$("candidate").innerHTML = `
+<b>TOP 5 RANKED DIGITS</b><br>
+${ranking.slice(0,5)
+.map((x,i)=>
+`${i+1}. Digit ${x.digit} — ${x.score.toFixed(2)}% model score`
+)
+.join("<br>")}
+<br>
+<span class="muted">
+These are normalized historical model rankings, not calibrated odds.
+</span>
+`;
+
+renderValidation();
+}
+
+/* RUN SCAN */
+
+function runScan() {
+if(digits.length<MIN_SAMPLE) {
+$("scanresult").innerHTML = `
+<b class="gold">MORE DATA NEEDED</b><br>
+${digits.length}/${MIN_SAMPLE} ticks collected.
+`;
+return;
+}
+
+const t = technicalAnalysis();
+const f = makeForecast(digits);
+
+const trendAgreement =
+(t.trend==="UPTREND" && t.rsi!==null && t.rsi>=50) ||
+(t.trend==="DOWNTREND" && t.rsi!==null && t.rsi<=50)
+? 1 : 0;
+
+const transitionSupport =
+f.transitionCount>=20 ? 1 : 0;
+
+const agreement = trendAgreement+transitionSupport;
+
+const assessment =
+digits.length>=500 && agreement>=2
+? "MODERATE DATA SUPPORT"
+: digits.length>=200 && agreement>=1
+? "LIMITED DATA SUPPORT"
+: "LOW / MIXED SUPPORT";
+
+const candidates = f.ranking
+.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`)
+.join(", ");
+
+const record = {
+time:new Date().toLocaleString(),
+market,
+digit:digits.at(-1),
+trend:t.trend,
+rsi:t.rsi,
+candidates,
+assessment
+};
+
+$("scanresult").innerHTML = `
+<b class="cyan">V2 MARKET SCAN · ${market}</b><br>
+Time: ${record.time}<br>
+Ticks analysed: ${digits.length}<br>
+Latest price: ${priceText(prices.at(-1))}<br>
+Latest digit: <b>${record.digit}</b><br><br>
+
+<b>TECHNICAL ANALYSIS</b><br>
+Trend: ${t.trend}<br>
+EMA 9: ${t.ema9===null?"N/A":priceText(t.ema9)}<br>
+EMA 21: ${t.ema21===null?"N/A":priceText(t.ema21)}<br>
+RSI 14: ${t.rsi===null?"N/A":t.rsi.toFixed(2)}<br>
+Momentum: ${t.momentum}<br>
+Support: ${t.support===null?"N/A":priceText(t.support)}<br>
+Resistance: ${t.resistance===null?"N/A":priceText(t.resistance)}<br><br>
+
+<b>DIGIT MODEL</b><br>
+Top candidates: ${candidates}<br>
+Model alignment indicators: ${agreement}/2<br><br>
+
+<b>ASSESSMENT: ${assessment}</b><br>
+
+<span class="muted">
+This assessment describes sample depth and limited indicator agreement.
+It is not a win probability or trading recommendation.
+</span>
+`;
+
+history.unshift(record);
+history = history.slice(0,60);
+
+try {
+localStorage.setItem(
+"derivV2History",
+JSON.stringify(history)
+);
+} catch(e) {}
 
 renderHistory();
+}
 
-updateStatus("READY TO CONNECT","#ffc857");
+function renderHistory() {
+$("history").innerHTML = "";
+
+history.slice(0,60).forEach(record => {
+const row = document.createElement("tr");
+
+[
+record.time,
+record.market,
+record.digit,
+record.trend,
+record.rsi==null ? "---" : Number(record.rsi).toFixed(1),
+record.candidates,
+record.assessment
+].forEach(value => {
+const cell = document.createElement("td");
+cell.textContent = value ?? "---";
+row.appendChild(cell);
+});
+
+$("history").appendChild(row);
+});
+}
+
+/* Button actions */
+
+$("connect").addEventListener("click",connect);
+
+$("disconnect").addEventListener("click",disconnect);
+
+$("scan").addEventListener("click",runScan);
+
+$("market").addEventListener("change",connect);
+
+$("clearhistory").addEventListener("click",()=>{
+if(confirm("Clear saved scan history?")) {
+history = [];
+localStorage.removeItem("derivV2History");
+renderHistory();
+}
+});
+
+/* Initial setup */
+
+renderHistory();
+renderValidation();
+update();
+
+$("active").textContent = market;
+$("docklabel").textContent = market;
 
 </script>
 
