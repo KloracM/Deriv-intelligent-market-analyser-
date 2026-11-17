@@ -315,7 +315,68 @@ padding:18px;
 color:var(--muted);
 font-size:10px;
 }
+/* V4 CONTRACT SELECTOR */
 
+.contract-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px;
+}
+
+.contract-choice{
+min-height:65px;
+background:#192943;
+border:1px solid #30435e;
+color:#91a5c0;
+font-size:11px;
+transition:.25s;
+}
+
+.contract-choice.active{
+background:linear-gradient(120deg,#006b91,#7029b5);
+border:1px solid #00e5ff;
+color:white;
+box-shadow:0 0 15px #00e5ff66;
+}
+
+.ai-result{
+background:linear-gradient(145deg,#101d34,#071322);
+border:1px solid #00b9c9;
+border-radius:12px;
+padding:18px;
+min-height:110px;
+text-align:center;
+line-height:1.8;
+}
+
+.ai-result .ai-number{
+font-size:48px;
+font-weight:900;
+color:#00e5ff;
+text-shadow:0 0 18px #00e5ff88;
+}
+
+.dock #scan{
+background:linear-gradient(100deg,#007bff,#8a2be2,#00d4ff);
+background-size:200% 200%;
+animation:aiGlow 3s ease infinite;
+border:1px solid #00e5ff;
+box-shadow:0 0 18px #00e5ff66;
+font-size:17px;
+font-weight:900;
+}
+
+@keyframes aiGlow{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
+}
+
+@media(max-width:450px){
+.contract-grid{
+grid-template-columns:1fr;
+}
+}
 @media(max-width:650px){
 .container{padding:8px}
 .panel{padding:11px}
@@ -366,7 +427,87 @@ font-size:10px;
 </div>
 </div>
 </section>
+<!-- V4 CONTRACT SELECTOR -->
 
+<section class="panel">
+<h2>CONTRACT SELECTOR</h2>
+
+<div class="contract-grid">
+
+<button class="contract-choice active"
+data-contract="RISE_FALL">
+📈 RISE / FALL
+</button>
+
+<button class="contract-choice"
+data-contract="OVER_UNDER">
+🔢 OVER / UNDER
+</button>
+
+<button class="contract-choice"
+data-contract="MATCHES_DIFFERS">
+🎯 MATCHES / DIFFERS
+</button>
+
+</div>
+
+<div id="contractSettings" class="result">
+
+<div id="barrierControl" style="display:none">
+<h3>SELECT BARRIER DIGIT</h3>
+<select id="barrierDigit">
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5" selected>5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+</select>
+</div>
+
+<div id="digitControl" style="display:none">
+<h3>SELECT TARGET DIGIT</h3>
+<select id="targetDigit">
+<option value="AUTO">AI SELECTS DIGIT</option>
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+</select>
+</div>
+
+<h3 style="margin-top:12px">FORECAST HORIZON</h3>
+<select id="aiHorizon">
+<option value="5">5 TICKS</option>
+<option value="10">10 TICKS</option>
+<option value="20">20 TICKS</option>
+</select>
+
+</div>
+
+</section>
+
+<!-- V4 AI RESULT -->
+
+<section class="panel">
+<h2>AI SCANNER RESULTS</h2>
+
+<div id="aiResult" class="ai-result">
+<div class="muted">
+Select a contract type and press AI SCAN.
+</div>
+</div>
+
+</section>
 <section class="cards">
 <div class="metric"><small>LAST PRICE</small><strong id="price">---</strong></div>
 <div class="metric"><small>LAST DIGIT</small><strong id="lastdigit" class="cyan">---</strong></div>
@@ -679,7 +820,7 @@ CLEAR HISTORY
 
 <div class="dock">
 <span id="docklabel">Selected market</span>
-<button id="scan" class="primary">⚡ RUN SCAN</button>
+<button id="scan" class="primary">✦ AI SCAN ✦</button>
 </div>
 
 <footer>
