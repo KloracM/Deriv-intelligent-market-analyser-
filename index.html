@@ -1127,6 +1127,8 @@ let digits = [];
 let times = [];
     let tickSequence = 0;
 let pendingContractPrediction = null;
+    let autoAIScanEnabled = false;
+let autoAIScanTimer = null;
 let pip = 2;
 let market = $("market").value;
 let manualClose = false;
@@ -2109,6 +2111,50 @@ function evaluateActiveContractPrediction(digit, price) {
         scanButton.disabled = false;
     }
 }
+    /* =================================
+   CONTINUOUS AI SCANNER
+================================= */
+
+function scheduleAutoAIScan() {
+
+    if (!autoAIScanEnabled) return;
+
+    if (
+        pendingContractPrediction &&
+        pendingContractPrediction.status === "ACTIVE"
+    ) return;
+
+    if (autoAIScanTimer !== null) return;
+
+    if (digits.length < MIN_SAMPLE) return;
+
+    const scheduledTick = tickSequence;
+
+    const signature = market + "|" + scheduledTick;
+
+    if (lastAIScanSignature === signature) return;
+
+    autoAIScanTimer = setTimeout(() => {
+
+        autoAIScanTimer = null;
+
+        if (!autoAIScanEnabled) return;
+
+        if (
+            pendingContractPrediction &&
+            pendingContractPrediction.status === "ACTIVE"
+        ) return;
+
+        // If another tick arrived, schedule against the latest tick.
+        if (tickSequence !== scheduledTick) {
+            scheduleAutoAIScan();
+            return;
+        }
+
+        runAIScan(true);
+
+    }, 500);
+}
 function schedulePredictions() {
 if(digits.length<MIN_SAMPLE)return;
 
@@ -2178,6 +2224,7 @@ function processTick(quote, precision, epoch) {
         digits.length >= MIN_SAMPLE ? "READY" : "COLLECTING";
 
     update();
+    scheduleAutoAIScan();
 }
 
 /* Digit distribution */
@@ -2598,8 +2645,10 @@ let lastAIScanSignature = "";
         /* ==========================================
    PHASE 3: INTELLIGENT AI SCANNER
 ========================================== */
+function runAIScan(automatic = false) {
 
-function runAIScan() {
+    autoAIScanEnabled = true;
+
 
     // PREVENT A NEW SCAN WHILE A PREDICTION IS ACTIVE
 
@@ -2633,10 +2682,8 @@ function runAIScan() {
         return;
     }
 
-
-    const signature =
-        market + "|" + digits.length + "|" + digits.at(-1);
-
+const signature = market + "|" + tickSequence;
+    
     if (signature === lastAIScanSignature) {
 
         $("aiResult").innerHTML = `
