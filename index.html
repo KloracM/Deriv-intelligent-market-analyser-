@@ -574,14 +574,29 @@ data-contract="MATCHES_DIFFERS">
 
 </section>
 
+<!-- V4 FLOATING AI SCANNER -->
 
-<section class="panel">
-<h2>AI SCANNER RESULTS</h2>
+<div id="aiPopup" class="ai-popup">
 
-<div id="aiResult" class="ai-result">
-<div class="muted">
-Select a contract type and press AI SCAN.
-</div>
+    <div class="ai-popup-head">
+        <b>✦ DERIV AI SCANNER</b>
+        <button id="closeAIPopup" type="button">✕</button>
+    </div>
+
+    <div id="aiResult" class="ai-result">
+        <div class="muted">
+            Select a contract and press AI SCAN.
+        </div>
+    </div>
+
+    <button id="scan" class="ai-scan-button" type="button">
+        ✦ AI SCAN ✦
+    </button>
+
+    <div class="muted">
+        Model predictions are estimates, not guaranteed wins.
+    </div>
+
 </div>
 
 </section>
@@ -2570,9 +2585,6 @@ $("exportAccuracy").addEventListener("click",exportAccuracy);
 renderHistory();
 renderAccuracy();
 update();
-
-$("active").textContent=market;
-$("docklabel").textContent=market;
 
 </script>
 
