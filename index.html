@@ -348,22 +348,85 @@ min-height:110px;
 text-align:center;
 line-height:1.8;
 }
+/* V4 FLOATING AI SCANNER */
 
+.ai-popup {
+    position: fixed;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: min(340px, calc(100vw - 24px));
+    max-height: 75vh;
+    overflow-y: auto;
+    z-index: 1000;
+    background: #0b1729;
+    border: 1px solid #00b9c9;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 0 25px #00b9c955;
+}
+
+.ai-popup-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.ai-popup-head button {
+    width: 34px;
+    padding: 7px;
+    background: #253a58;
+}
+
+.ai-scan-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    background: linear-gradient(110deg, #007bb5, #7029b5);
+    color: white;
+    border: 1px solid #00e5ff;
+    border-radius: 9px;
+    font-size: 14px;
+    box-shadow: 0 0 12px #00e5ff44;
+}
+
+.ai-popup.hidden {
+    display: none;
+}
+
+/* MOBILE LAYOUT */
+
+@media(max-width:700px) {
+    .cards {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .market-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:380px) {
+    .contract-grid {
+        grid-template-columns: 1fr;
+    }
+}
 .ai-result .ai-number{
 font-size:48px;
 font-weight:900;
 color:#00e5ff;
 text-shadow:0 0 18px #00e5ff88;
 }
-
-.dock #scan{
-background:linear-gradient(100deg,#007bff,#8a2be2,#00d4ff);
-background-size:200% 200%;
-animation:aiGlow 3s ease infinite;
-border:1px solid #00e5ff;
-box-shadow:0 0 18px #00e5ff66;
-font-size:17px;
-font-weight:900;
+.dock #aiScanButton,
+.dock #scan {
+    background:linear-gradient(100deg,#007bff,#8a2be2,#00d4ff);
+    background-size:200% 200%;
+    animation:aiGlow 3s ease infinite;
+    border:1px solid #00e5ff;
+    box-shadow:0 0 18px #00e5ff66;
+    font-size:17px;
+    font-weight:900;
 }
 
 @keyframes aiGlow{
@@ -1213,22 +1276,39 @@ setStatus("DISCONNECTED");
 }
 
 function resetMarket() {
-prices=[];
-digits=[];
-times=[];
-pendingPredictions=[];
+    // Cancel any active prediction when changing markets
+    if (pendingContractPrediction &&
+        pendingContractPrediction.status === "ACTIVE") {
+        pendingContractPrediction.status = "CANCELLED";
+    }
 
-$("price").textContent="---";
-$("lastdigit").textContent="---";
-$("bigdigit").textContent="--";
-$("ticks").textContent="0";
-$("epoch").textContent="---";
-$("sample").textContent="WAITING";
+    pendingContractPrediction = null;
 
-$("active").textContent=market;
-$("scanresult").textContent="Waiting for market history...";
+    prices = [];
+    digits = [];
+    times = [];
+    tickSequence = 0;
+    pendingPredictions = [];
 
-update();
+    // Reset automatic scanning
+    if (autoAIScanTimer !== null) {
+        clearTimeout(autoAIScanTimer);
+        autoAIScanTimer = null;
+    }
+
+    lastAIScanSignature = "";
+
+    $("price").textContent = "---";
+    $("lastdigit").textContent = "---";
+    $("bigdigit").textContent = "--";
+    $("ticks").textContent = "0";
+    $("epoch").textContent = "---";
+    $("sample").textContent = "WAITING";
+
+    $("active").textContent = market;
+    $("scanresult").textContent = "Waiting for market history...";
+
+    update();
 }
 
 function connect() {
@@ -1379,6 +1459,7 @@ $("sample").textContent=
 digits.length>=MIN_SAMPLE?"READY":"COLLECTING";
 
 update();
+    tickSequence = prices.length;
 }
 
 function countDigits(array) {
