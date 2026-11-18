@@ -850,92 +850,7 @@ Past frequency and overdue status do not guarantee future outcomes.
 <div class="result" id="candidate">
 Collecting candidate rankings...
 </div>
-<section class="cards">
-<div class="metric"><small>LAST PRICE</small><strong id="price">---</strong></div>
-<div class="metric"><small>LAST DIGIT</small><strong id="lastdigit" class="cyan">---</strong></div>
-<div class="metric"><small>BUFFERED TICKS</small><strong id="ticks">0</strong></div>
-<div class="metric"><small>MARKET TREND</small><strong id="trend">---</strong></div>
-</section>
 
-<section class="panel hero">
-<div class="hero-digit">
-<h2>LIVE LAST DIGIT</h2>
-<div id="bigdigit" class="big-digit">--</div>
-<div id="updated" class="muted">Waiting for ticks</div>
-</div>
-
-<div>
-<h2>LIVE SNAPSHOT</h2>
-<div class="metric">
-<small>ACTIVE MARKET</small>
-<strong id="active">1HZ10V</strong>
-</div>
-<div class="metric" style="margin-top:8px">
-<small>LAST TICK TIME</small>
-<strong id="epoch">---</strong>
-</div>
-<div class="metric" style="margin-top:8px">
-<small>DATA SAMPLE</small>
-<strong id="sample">WAITING</strong>
-</div>
-</div>
-</section>
-
-<section class="panel">
-<h2>DIGIT DISTRIBUTION · 0–9</h2>
-<div id="digitgrid" class="digits"></div>
-
-<div class="result">
-<b class="green">HOT DIGITS:</b> <span id="hot">---</span><br>
-<b class="red">COLD DIGITS:</b> <span id="cold">---</span><br>
-<b class="gold">MOST OVERDUE:</b> <span id="overdue">---</span>
-<div class="muted">
-Past frequency and overdue status do not guarantee future outcomes.
-</div>
-</div>
-</section>
-
-<section class="panel">
-<h2>EVEN / ODD BALANCE</h2>
-<div class="cards">
-<div class="metric"><small>EVEN</small><strong id="evenpct">0%</strong></div>
-<div class="metric"><small>ODD</small><strong id="oddpct">0%</strong></div>
-<div class="metric"><small>EVEN COUNT</small><strong id="evencount">0</strong></div>
-<div class="metric"><small>ODD COUNT</small><strong id="oddcount">0</strong></div>
-</div>
-</section>
-
-<section class="panel">
-<h2>TECHNICAL MARKET INTELLIGENCE</h2>
-<div class="cards">
-<div class="metric"><small>EMA 9</small><strong id="ema9">---</strong></div>
-<div class="metric"><small>EMA 21</small><strong id="ema21">---</strong></div>
-<div class="metric"><small>RSI · 14</small><strong id="rsi">---</strong></div>
-<div class="metric"><small>MOMENTUM · 20 TICKS</small><strong id="momentum">---</strong></div>
-<div class="metric"><small>SUPPORT · 50 TICKS</small><strong id="support">---</strong></div>
-<div class="metric"><small>RESISTANCE · 50 TICKS</small><strong id="resistance">---</strong></div>
-<div class="metric"><small>AVG ABS MOVEMENT</small><strong id="movement">---</strong></div>
-<div class="metric"><small>MARKET CONDITION</small><strong id="condition">---</strong></div>
-</div>
-</section>
-
-<section class="panel">
-<h2>FREQUENCY & DIGIT TRANSITIONS</h2>
-<div class="split">
-<div class="metric">
-<small>TOP · LAST 100 TICKS</small>
-<strong id="top100">---</strong>
-</div>
-<div class="metric">
-<small>TOP · LAST 300 TICKS</small>
-<strong id="top300">---</strong>
-</div>
-</div>
-<div class="result" id="transitions">Collecting transition data...</div>
-</section>
-<div class="result" id="candidate">
-Collecting candidate rankings...
-</div>
 <!-- NEW: FUTURE TICK ANALYSIS -->
 
 <section class="panel">
@@ -1255,11 +1170,10 @@ $("updated").textContent =
 "Updated " + new Date().toLocaleTimeString();
 
 const element = $("bigdigit");
-
-element.classList.remove("pop");
+element.classList.remove("pop", "digit-pop");
 void element.offsetWidth;
-element.classList.add("pop");
-}
+element.classList.add("digit-pop");
+
 
 function disconnect() {
 manualClose=true;
@@ -1329,9 +1243,18 @@ return;
 }
 
 const currentSocket=socket;
-
+const connectionTimeout = setTimeout(() => {
+    if (
+        socket === currentSocket &&
+        currentSocket.readyState !== WebSocket.OPEN
+    ) {
+        setStatus("CONNECTION TIMEOUT","#ff5b75");
+        currentSocket.close();
+    }
+}, 15000);
 currentSocket.onopen=()=>{
 if(socket!==currentSocket)return;
+    clearTimeout(connectionTimeout);
 
 setStatus("CONNECTED · LOADING HISTORY","#00e69a");
 
@@ -1378,10 +1301,10 @@ if(data.msg_type==="history" && data.history) {
 loadHistory(data.history,data.pip_size);
 
 if(currentSocket.readyState===WebSocket.OPEN) {
+
 currentSocket.send(JSON.stringify({
-ticks:market,
-subscribe:1,
-req_id:2
+ticks: market,
+subscribe: 1
 }));
 
 setStatus("LIVE STREAM ACTIVE","#00e69a");
