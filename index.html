@@ -519,6 +519,42 @@ grid-template-columns:1fr;
         font-size: 90px;
     }
 }
+    /* PHASE 4: LOCKED PREDICTION PANEL */
+
+.expiry-panel {
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid rgba(0, 220, 200, 0.35);
+    border-radius: 14px;
+    background: rgba(0, 180, 160, 0.07);
+    text-align: center;
+}
+
+.expiry-panel h3 {
+    margin-top: 0;
+}
+
+.expiry-panel div {
+    margin: 9px 0;
+}
+
+#aiRemaining {
+    color: #00e5ff;
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.expiry-result.hit {
+    color: #00e676;
+}
+
+.expiry-result.miss {
+    color: #ff5252;
+}
+
+.expiry-result.void {
+    color: #ffc107;
+}
 </style>
 </head>
 
@@ -619,12 +655,22 @@ data-contract="MATCHES_DIFFERS">
 </div>
 
 <h3 style="margin-top:12px">FORECAST HORIZON</h3>
+    
 <select id="aiHorizon">
 <option value="5">5 TICKS</option>
 <option value="10">10 TICKS</option>
 <option value="20">20 TICKS</option>
 </select>
+<label for="aiExpiry">CONTRACT EXPIRY</label>
 
+<select id="aiExpiry">
+    <option value="1">1 TICK</option>
+    <option value="2">2 TICKS</option>
+    <option value="3">3 TICKS</option>
+    <option value="5" selected>5 TICKS</option>
+    <option value="10">10 TICKS</option>
+    <option value="20">20 TICKS</option>
+</select>
 </div>
 
 </section>
@@ -2555,6 +2601,28 @@ let lastAIScanSignature = "";
 
 function runAIScan() {
 
+    // PREVENT A NEW SCAN WHILE A PREDICTION IS ACTIVE
+
+    if (
+        pendingContractPrediction &&
+        pendingContractPrediction.status === "ACTIVE"
+    ) {
+        $("aiResult").innerHTML = `
+            <h2 class="gold">PREDICTION ACTIVE</h2>
+
+            Your current prediction is locked.
+
+            Remaining ticks:
+            ${Math.max(
+                pendingContractPrediction.expiryTick - tickSequence,
+                0
+            )}
+        `;
+
+        return;
+    }
+
+
     if (digits.length < MIN_SAMPLE) {
 
         $("aiResult").innerHTML = `
@@ -2564,6 +2632,7 @@ function runAIScan() {
 
         return;
     }
+
 
     const signature =
         market + "|" + digits.length + "|" + digits.at(-1);
@@ -2578,9 +2647,10 @@ function runAIScan() {
         return;
     }
 
-    lastAIScanSignature = signature;
 
     const horizon = Number($("aiHorizon").value);
+
+    const expiry = Number($("aiExpiry").value);
 
     const forecast =
         buildContractDistribution(digits, horizon);
@@ -2594,6 +2664,7 @@ function runAIScan() {
 
         return;
     }
+
 
     let prediction = "WAIT";
     let score = 0;
@@ -2622,6 +2693,7 @@ function runAIScan() {
 
         explanation = `
             Rise votes: ${result.riseVotes}/4.<br>
+
             Fall votes: ${result.fallVotes}/4.<br><br>
 
             ${result.details.join("<br>")}
@@ -2656,6 +2728,7 @@ function runAIScan() {
             ${result.underScore.toFixed(2)}%.<br><br>
 
             Equality with the barrier is excluded.
+
             ${result.validBarrier
                 ? ""
                 : "<br>Boundary barrier: no qualified signal."}
@@ -2675,8 +2748,8 @@ function runAIScan() {
 
         const target =
             selectedDigit === "AUTO"
-            ? forecast.ranking[0].digit
-            : Number(selectedDigit);
+                ? forecast.ranking[0].digit
+                : Number(selectedDigit);
 
         displayDigit = target;
 
@@ -2714,6 +2787,107 @@ function runAIScan() {
         score >= 75 ? "GOOD AGREEMENT" :
         score >= 65 ? "MODERATE AGREEMENT" :
         "LOW AGREEMENT";
+
+
+    /* =================================
+       LOCK QUALIFIED PREDICTION
+    ================================= */
+
+    let lockMessage = "NO ACTIVE PREDICTION";
+
+    if (qualified) {
+
+        let cleanPrediction = prediction;
+        let targetDigit = null;
+        let barrierDigit = null;
+
+        if (selectedContract === "RISE_FALL") {
+
+            cleanPrediction = prediction;
+
+        }
+
+        else if (selectedContract === "OVER_UNDER") {
+
+            cleanPrediction = prediction;
+
+            barrierDigit =
+                Number($("barrierDigit").value);
+
+        }
+
+        else if (selectedContract === "MATCHES_DIFFERS") {
+
+            cleanPrediction =
+                prediction.split(" · ")[0];
+
+            targetDigit = displayDigit;
+
+        }
+
+
+        pendingContractPrediction = {
+
+            market: market,
+
+            contractType: selectedContract,
+
+            prediction: cleanPrediction,
+
+            targetDigit: targetDigit,
+
+            barrier: barrierDigit,
+
+            entryDigit: digits.at(-1),
+
+            entryPrice: prices.at(-1),
+
+            startTick: tickSequence,
+
+            expiryTicks: expiry,
+
+            expiryTick: tickSequence + expiry,
+
+            score: score,
+
+            grade: grade,
+
+            status: "ACTIVE"
+
+        };
+
+        lockMessage = `
+            <div class="expiry-panel">
+
+                <h3 class="green">
+                    PREDICTION LOCKED
+                </h3>
+
+                <div>
+                    EXPIRY:
+                    <strong>${expiry} TICKS</strong>
+                </div>
+
+                <div>
+                    REMAINING:
+                    <strong id="aiRemaining">${expiry}</strong>
+                </div>
+
+                <div>
+                    STATUS:
+                    <strong id="aiExpiryStatus">
+                        ACTIVE
+                    </strong>
+                </div>
+
+                <div id="aiExpiryDetails">
+                    Waiting for expiry...
+                </div>
+
+            </div>
+        `;
+
+    }
 
 
     /* =================================
@@ -2785,6 +2959,9 @@ function runAIScan() {
         </div>
 
 
+        ${lockMessage}
+
+
         <div class="result">
 
             <b>AI MODEL ANALYSIS</b><br><br>
@@ -2827,6 +3004,9 @@ function runAIScan() {
             of winning. Predictions are experimental
             and require independent validation.
 
+            These are simulated predictions, not actual
+            Deriv contracts or trades.
+
         </div>
 
     `;
@@ -2844,7 +3024,12 @@ function runAIScan() {
     $("scanresult").textContent =
         prediction + " · " + score.toFixed(1) + "%";
 
-}    
+
+    lastAIScanSignature = signature;
+
+}
+            
+
 
 /* Scan */
 
