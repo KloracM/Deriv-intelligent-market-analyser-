@@ -433,6 +433,23 @@ font-weight:900;
     color:white;
     font-weight:900;
 }
+    .ai-orb.active {
+    background:radial-gradient(circle,#00e69a,#006b91);
+    box-shadow:0 0 20px #00e69a,0 0 40px #00e69a;
+}
+
+.ai-orb:active {
+    transform:translateY(-50%) scale(.94);
+}
+
+.ai-popup {
+    max-width:calc(100vw - 110px);
+}
+
+.expiry-countdown {
+    display:block;
+    margin-top:8px;
+}
 @media(max-width:450px){
 .contract-grid{
 grid-template-columns:1fr;
@@ -1101,8 +1118,6 @@ manualClose=false;
 market=$("market").value;
 
 resetMarket();
-
-$("docklabel").textContent=market;
 
 setStatus("CONNECTING...");
 
@@ -2480,6 +2495,17 @@ document.querySelectorAll(".contract-choice").forEach(button => {
 
 });
 
+
+/* V4 FLOATING AI SCANNER */
+
+$("aiOrb").addEventListener("click",() => {
+    $("aiPopup").classList.toggle("open");
+});
+
+$("closeAIPopup").addEventListener("click",() => {
+    $("aiPopup").classList.remove("open");
+});
+
 /* AI SCAN BUTTON */
 
 $("scan").addEventListener("click",runAIScan);
@@ -2487,59 +2513,58 @@ $("scan").addEventListener("click",runAIScan);
 $("compare").addEventListener("click",compareMarkets);
 
 $("clearhistory").addEventListener("click",()=>{
-if(confirm("Clear saved scan history?")) {
-history=[];
-localStorage.removeItem("derivV3History");
-renderHistory();
-}
+    if(confirm("Clear saved scan history?")) {
+        history=[];
+        localStorage.removeItem("derivV3History");
+        renderHistory();
+    }
 });
 
 $("resetAccuracy").addEventListener("click",()=>{
-if(confirm("Reset all prediction accuracy records?")) {
-accuracy={
-5:{tested:0,top1:0,top3:0},
-10:{tested:0,top1:0,top3:0},
-20:{tested:0,top1:0,top3:0}
-};
+    if(confirm("Reset all prediction accuracy records?")) {
+        accuracy={
+            5:{tested:0,top1:0,top3:0},
+            10:{tested:0,top1:0,top3:0},
+            20:{tested:0,top1:0,top3:0}
+        };
 
-pendingPredictions=[];
+        pendingPredictions=[];
 
-saveAccuracy();
-}
+        saveAccuracy();
+    }
 });
 
 $("alertToggle").addEventListener("click",()=>{
-alertsEnabled=!alertsEnabled;
+    alertsEnabled=!alertsEnabled;
 
-$("alertToggle").textContent=
-alertsEnabled?"DISABLE ALERTS":"ENABLE ALERTS";
+    $("alertToggle").textContent=
+        alertsEnabled?"DISABLE ALERTS":"ENABLE ALERTS";
 
-$("alertStatus").textContent=
-alertsEnabled
-?"Smart alerts are active."
-:"Smart alerts are disabled.";
+    $("alertStatus").textContent=
+        alertsEnabled
+        ?"Smart alerts are active."
+        :"Smart alerts are disabled.";
 
-if(!alertsEnabled)lastAlertKey="";
+    if(!alertsEnabled)lastAlertKey="";
 });
 
 $("notificationPermission").addEventListener("click",async()=>{
-if(!("Notification" in window)) {
-alert("Browser notifications are not supported.");
-return;
-}
+    if(!("Notification" in window)) {
+        alert("Browser notifications are not supported.");
+        return;
+    }
 
-const permission=await Notification.requestPermission();
+    const permission=await Notification.requestPermission();
 
-$("alertStatus").textContent=
-permission==="granted"
-?"Browser notifications enabled."
-:"Browser notifications were not enabled.";
+    $("alertStatus").textContent=
+        permission==="granted"
+        ?"Browser notifications enabled."
+        :"Browser notifications were not enabled.";
 });
 
 $("exportScans").addEventListener("click",exportScans);
 
 $("exportAccuracy").addEventListener("click",exportAccuracy);
-
 /* Initial setup */
 
 renderHistory();
