@@ -356,15 +356,14 @@ color:#00e5ff;
 text-shadow:0 0 18px #00e5ff88;
 }
 
-.dock #aiScanButton,
-.dock #scan {
-    background:linear-gradient(100deg,#007bff,#8a2be2,#00d4ff);
-    background-size:200% 200%;
-    animation:aiGlow 3s ease infinite;
-    border:1px solid #00e5ff;
-    box-shadow:0 0 18px #00e5ff66;
-    font-size:17px;
-    font-weight:900;
+.dock #scan{
+background:linear-gradient(100deg,#007bff,#8a2be2,#00d4ff);
+background-size:200% 200%;
+animation:aiGlow 3s ease infinite;
+border:1px solid #00e5ff;
+box-shadow:0 0 18px #00e5ff66;
+font-size:17px;
+font-weight:900;
 }
 
 @keyframes aiGlow{
@@ -690,9 +689,10 @@ data-contract="MATCHES_DIFFERS">
             Select a contract and press AI SCAN.
         </div>
     </div>
-<button id="aiScanButton" class="ai-scan-button" type="button">
-    ✦ AI SCAN ✦
-</button>
+
+    <button id="scan" class="ai-scan-button" type="button">
+        ✦ AI SCAN ✦
+    </button>
 
     <div class="muted">
         Model predictions are estimates, not guaranteed wins.
@@ -1701,137 +1701,66 @@ function analyseRiseFall(horizon) {
 
 function analyseOverUnder(distribution, barrier) {
 
-    barrier = Number(barrier);
-
-    if (
-        !Array.isArray(distribution) ||
-        distribution.length < 10 ||
-        !Number.isInteger(barrier) ||
-        barrier < 0 ||
-        barrier > 9
-    ) {
-        return {
-            prediction: "WAIT",
-            score: 0,
-            overScore: 0,
-            underScore: 0,
-            equalScore: 0,
-            barrier,
-            qualified: false,
-            validBarrier: false
-        };
-    }
-
-    const values = distribution
-        .slice(0, 10)
-        .map(value => Number(value));
-
-    if (values.some(value => !Number.isFinite(value) || value < 0)) {
-        return {
-            prediction: "WAIT",
-            score: 0,
-            overScore: 0,
-            underScore: 0,
-            equalScore: 0,
-            barrier,
-            qualified: false,
-            validBarrier: false
-        };
-    }
-
-    const total = values.reduce((sum, value) => sum + value, 0);
-
-    if (total <= 0) {
-        return {
-            prediction: "WAIT",
-            score: 0,
-            overScore: 0,
-            underScore: 0,
-            equalScore: 0,
-            barrier,
-            qualified: false,
-            validBarrier: false
-        };
-    }
-
     let over = 0;
     let under = 0;
-    let equal = values[barrier];
 
     for (let digit = 0; digit <= 9; digit++) {
 
         if (digit > barrier) {
-            over += values[digit];
+            over += distribution[digit];
         }
 
         if (digit < barrier) {
-            under += values[digit];
+            under += distribution[digit];
         }
+
     }
 
-    const overScore = (over / total) * 100;
-    const underScore = (under / total) * 100;
-    const equalScore = (equal / total) * 100;
+    const total = over + under;
 
-    const directionalTotal = overScore + underScore;
+    const overScore =
+        total > 0 ? (over / total) * 100 : 0;
 
-    const conditionalOver =
-        directionalTotal > 0
-            ? (overScore / directionalTotal) * 100
-            : 0;
-
-    const conditionalUnder =
-        directionalTotal > 0
-            ? (underScore / directionalTotal) * 100
-            : 0;
+    const underScore =
+        total > 0 ? (under / total) * 100 : 0;
 
     let prediction = "WAIT";
     let score = 0;
 
-    if (conditionalOver > conditionalUnder) {
+    if (overScore > underScore) {
 
         prediction = "OVER";
-        score = conditionalOver;
+        score = overScore;
 
-    } else if (conditionalUnder > conditionalOver) {
+    } else if (underScore > overScore) {
 
         prediction = "UNDER";
-        score = conditionalUnder;
+        score = underScore;
 
     }
 
-    const margin = Math.abs(
-        conditionalOver - conditionalUnder
-    );
-
+    // Barriers 0 and 9 leave only one possible side.
+    // Avoid treating such a forced outcome as an AI edge.
     const validBarrier = barrier >= 1 && barrier <= 8;
 
-    // These are experimental screening thresholds,
-    // not verified probabilities of winning.
     const qualified =
         validBarrier &&
-        score >= 60 &&
-        margin >= 20;
+        score >= 70;
 
     return {
 
         prediction,
         score,
-
         overScore,
         underScore,
-        equalScore,
-
-        conditionalOver,
-        conditionalUnder,
-
-        margin,
         barrier,
-
         qualified,
         validBarrier
+
     };
+
 }
+
 
 /* ==========================================
    PHASE 3: MATCHES/DIFFERS ANALYSIS ENGINE
@@ -1839,76 +1768,52 @@ function analyseOverUnder(distribution, barrier) {
 
 function analyseMatchesDiffers(distribution, selectedDigit) {
 
-    if (!Array.isArray(distribution) || distribution.length < 10) {
-        return {
-            prediction: "WAIT",
-            target: null,
-            matchScore: 0,
-            differScore: 0,
-            score: 0,
-            qualified: false
-        };
-    }
-
     const target = Number(selectedDigit);
 
-    if (!Number.isInteger(target) || target < 0 || target > 9) {
-        return {
-            prediction: "WAIT",
-            target: null,
-            matchScore: 0,
-            differScore: 0,
-            score: 0,
-            qualified: false
-        };
-    }
-
-    const total = distribution
-        .slice(0, 10)
-        .reduce((sum, value) => sum + Number(value), 0);
-
-    if (!Number.isFinite(total) || total <= 0) {
-        return {
-            prediction: "WAIT",
-            target,
-            matchScore: 0,
-            differScore: 0,
-            score: 0,
-            qualified: false
-        };
-    }
-
-    const matchScore =
-        (Number(distribution[target]) / total) * 100;
+    const matchScore = distribution[target];
 
     const differScore = 100 - matchScore;
 
     let prediction = "WAIT";
     let score = 0;
 
-    if (matchScore > differScore) {
+    if (matchScore >= differScore) {
+
         prediction = "MATCHES";
         score = matchScore;
+
     } else {
+
         prediction = "DIFFERS";
         score = differScore;
+
     }
+
+    /*
+       Matches requires strong concentration
+       on the selected digit.
+
+       Differs requires an even stronger
+       model share to avoid weak signals.
+    */
 
     const qualified =
         prediction === "MATCHES"
-            ? matchScore >= 65
-            : differScore >= 95;
+        ? matchScore >= 65
+        : differScore >= 95;
 
     return {
+
         prediction,
         target,
         matchScore,
         differScore,
         score,
         qualified
-    };
-}
 
+    };
+
+}
 function makeForecast(array) {
 if(array.length<MIN_SAMPLE)return null;
 
@@ -1946,9 +1851,7 @@ score:100*scores[digit]/total
 }));
 
 return {transitionCount,ranking};
-}nalyseMatchesDiffers(distribution, selectedDigit) {
-
-    const
+}
 
 /* Technical indicators */
 
