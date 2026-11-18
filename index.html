@@ -371,7 +371,68 @@ font-weight:900;
 50%{background-position:100% 50%}
 100%{background-position:0% 50%}
 }
+/* FLOATING AI ORB */
 
+.ai-orb{
+    position:fixed;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    z-index:50;
+    font-size:27px;
+    color:white;
+    border:2px solid #00e5ff;
+    background:radial-gradient(circle,#8a2be2,#006b91);
+    box-shadow:0 0 12px #00e5ff,0 0 30px #8a2be2;
+    animation:orbPulse 2s infinite;
+}
+
+@keyframes orbPulse{
+    0%,100%{box-shadow:0 0 12px #00e5ff,0 0 25px #8a2be2}
+    50%{box-shadow:0 0 25px #00e5ff,0 0 45px #8a2be2}
+}
+
+.ai-popup{
+    display:none;
+    position:fixed;
+    right:88px;
+    top:50%;
+    transform:translateY(-50%);
+    width:min(310px,calc(100vw - 110px));
+    max-height:80vh;
+    overflow-y:auto;
+    z-index:49;
+    background:#101d34;
+    border:1px solid #00e5ff;
+    border-radius:15px;
+    padding:13px;
+    box-shadow:0 0 25px #00e5ff55;
+}
+
+.ai-popup.open{
+    display:block;
+}
+
+.ai-popup-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:#00e5ff;
+    margin-bottom:12px;
+}
+
+.ai-scan-button{
+    width:100%;
+    margin:12px 0;
+    padding:13px;
+    background:linear-gradient(100deg,#007bff,#8a2be2);
+    border:1px solid #00e5ff;
+    color:white;
+    font-weight:900;
+}
 @media(max-width:450px){
 .contract-grid{
 grid-template-columns:1fr;
@@ -496,7 +557,6 @@ data-contract="MATCHES_DIFFERS">
 
 </section>
 
-<!-- V4 AI RESULT -->
 
 <section class="panel">
 <h2>AI SCANNER RESULTS</h2>
@@ -508,6 +568,92 @@ Select a contract type and press AI SCAN.
 </div>
 
 </section>
+<section class="cards">
+<div class="metric"><small>LAST PRICE</small><strong id="price">---</strong></div>
+<div class="metric"><small>LAST DIGIT</small><strong id="lastdigit" class="cyan">---</strong></div>
+<div class="metric"><small>BUFFERED TICKS</small><strong id="ticks">0</strong></div>
+<div class="metric"><small>MARKET TREND</small><strong id="trend">---</strong></div>
+</section>
+
+<section class="panel hero">
+<div class="hero-digit">
+<h2>LIVE LAST DIGIT</h2>
+<div id="bigdigit" class="big-digit">--</div>
+<div id="updated" class="muted">Waiting for ticks</div>
+</div>
+
+<div>
+<h2>LIVE SNAPSHOT</h2>
+<div class="metric">
+<small>ACTIVE MARKET</small>
+<strong id="active">1HZ10V</strong>
+</div>
+<div class="metric" style="margin-top:8px">
+<small>LAST TICK TIME</small>
+<strong id="epoch">---</strong>
+</div>
+<div class="metric" style="margin-top:8px">
+<small>DATA SAMPLE</small>
+<strong id="sample">WAITING</strong>
+</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>DIGIT DISTRIBUTION · 0–9</h2>
+<div id="digitgrid" class="digits"></div>
+
+<div class="result">
+<b class="green">HOT DIGITS:</b> <span id="hot">---</span><br>
+<b class="red">COLD DIGITS:</b> <span id="cold">---</span><br>
+<b class="gold">MOST OVERDUE:</b> <span id="overdue">---</span>
+<div class="muted">
+Past frequency and overdue status do not guarantee future outcomes.
+</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>EVEN / ODD BALANCE</h2>
+<div class="cards">
+<div class="metric"><small>EVEN</small><strong id="evenpct">0%</strong></div>
+<div class="metric"><small>ODD</small><strong id="oddpct">0%</strong></div>
+<div class="metric"><small>EVEN COUNT</small><strong id="evencount">0</strong></div>
+<div class="metric"><small>ODD COUNT</small><strong id="oddcount">0</strong></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>TECHNICAL MARKET INTELLIGENCE</h2>
+<div class="cards">
+<div class="metric"><small>EMA 9</small><strong id="ema9">---</strong></div>
+<div class="metric"><small>EMA 21</small><strong id="ema21">---</strong></div>
+<div class="metric"><small>RSI · 14</small><strong id="rsi">---</strong></div>
+<div class="metric"><small>MOMENTUM · 20 TICKS</small><strong id="momentum">---</strong></div>
+<div class="metric"><small>SUPPORT · 50 TICKS</small><strong id="support">---</strong></div>
+<div class="metric"><small>RESISTANCE · 50 TICKS</small><strong id="resistance">---</strong></div>
+<div class="metric"><small>AVG ABS MOVEMENT</small><strong id="movement">---</strong></div>
+<div class="metric"><small>MARKET CONDITION</small><strong id="condition">---</strong></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>FREQUENCY & DIGIT TRANSITIONS</h2>
+<div class="split">
+<div class="metric">
+<small>TOP · LAST 100 TICKS</small>
+<strong id="top100">---</strong>
+</div>
+<div class="metric">
+<small>TOP · LAST 300 TICKS</small>
+<strong id="top300">---</strong>
+</div>
+</div>
+<div class="result" id="transitions">Collecting transition data...</div>
+</section>
+<div class="result" id="candidate">
+Collecting candidate rankings...
+</div>
 <section class="cards">
 <div class="metric"><small>LAST PRICE</small><strong id="price">---</strong></div>
 <div class="metric"><small>LAST DIGIT</small><strong id="lastdigit" class="cyan">---</strong></div>
@@ -818,10 +964,9 @@ CLEAR HISTORY
 
 </main>
 
-<div class="dock">
-<span id="docklabel">Selected market</span>
-<button id="scan" class="primary">✦ AI SCAN ✦</button>
-</div>
+<button id="aiOrb" class="ai-orb">
+    ✦
+</button>
 
 <footer>
 DERIV INTELLIGENT MARKET ANALYSER V3.0 · Analysis only · Not financial advice
