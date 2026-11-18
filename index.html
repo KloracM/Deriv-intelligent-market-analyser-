@@ -2110,6 +2110,11 @@ function evaluateActiveContractPrediction(digit, price) {
     if (scanButton) {
         scanButton.disabled = false;
     }
+    if (autoAIScanEnabled) {
+    setTimeout(() => {
+        scheduleAutoAIScan();
+    }, 1000);
+}
 }
     /* =================================
    CONTINUOUS AI SCANNER
