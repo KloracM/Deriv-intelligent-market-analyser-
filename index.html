@@ -1079,6 +1079,8 @@ let socket = null;
 let prices = [];
 let digits = [];
 let times = [];
+    let tickSequence = 0;
+let pendingContractPrediction = null;
 let pip = 2;
 let market = $("market").value;
 let manualClose = false;
@@ -1966,7 +1968,101 @@ pendingPredictions=remaining;
 
 saveAccuracy();
 }
+function evaluateActiveContractPrediction(digit, price) {
+    const prediction = pendingContractPrediction;
 
+    if (!prediction || prediction.status !== "ACTIVE") return;
+
+    const remaining = prediction.expiryTick - tickSequence;
+
+    const countdown = document.getElementById("aiRemaining");
+
+    if (countdown) {
+        countdown.textContent = Math.max(remaining, 0);
+    }
+
+    if (tickSequence < prediction.expiryTick) return;
+
+    let result = "MISS";
+    let outcome = "";
+
+    if (prediction.contractType === "RISE_FALL") {
+        if (price > prediction.entryPrice) {
+            outcome = "RISE";
+        } else if (price < prediction.entryPrice) {
+            outcome = "FALL";
+        } else {
+            outcome = "NO MOVEMENT";
+        }
+
+        if (outcome === "NO MOVEMENT") {
+            result = "VOID";
+        } else {
+            result = outcome === prediction.prediction ? "HIT" : "MISS";
+        }
+    }
+
+    else if (prediction.contractType === "OVER_UNDER") {
+        outcome = digit > prediction.barrier ? "OVER" :
+                  digit < prediction.barrier ? "UNDER" : "EQUAL";
+
+        result = outcome === prediction.prediction ? "HIT" : "MISS";
+    }
+
+    else if (prediction.contractType === "MATCHES_DIFFERS") {
+        outcome = digit === prediction.targetDigit ? "MATCHES" : "DIFFERS";
+
+        result = outcome === prediction.prediction ? "HIT" : "MISS";
+    }
+
+    prediction.status = result;
+    prediction.exitDigit = digit;
+    prediction.exitPrice = price;
+    prediction.completedAtTick = tickSequence;
+
+    const status = document.getElementById("aiExpiryStatus");
+
+    if (status) {
+        status.textContent = result;
+        status.className = "expiry-result " + result.toLowerCase();
+    }
+
+    if (countdown) {
+        countdown.textContent = "0";
+    }
+
+    const details = document.getElementById("aiExpiryDetails");
+
+    if (details) {
+        details.textContent =
+            "Expiry digit: " + digit +
+            " | Result: " + result;
+    }
+
+    // Save simulated prediction results.
+    let stats = {};
+
+    try {
+        stats = JSON.parse(
+            localStorage.getItem("derivContractStatsV4") || "{}"
+        );
+    } catch (error) {
+        stats = {};
+    }
+
+    stats[result] = (stats[result] || 0) + 1;
+
+    localStorage.setItem(
+        "derivContractStatsV4",
+        JSON.stringify(stats)
+    );
+
+    const scanButton = document.getElementById("aiScanButton");
+
+    if (scanButton) {
+        scanButton.disabled = false;
+    }
+}
 function schedulePredictions() {
 if(digits.length<MIN_SAMPLE)return;
 
@@ -1991,43 +2087,51 @@ pendingPredictions=pendingPredictions.slice(-100);
 
 /* Live tick processing */
 
-function processTick(quote,precision,epoch) {
-const value=Number(quote);
+function processTick(quote, precision, epoch) {
+    const value = Number(quote);
 
-if(!Number.isFinite(value))return;
+    if (!Number.isFinite(value)) return;
 
-pip=Number.isInteger(precision)?precision:pip;
+    pip = Number.isInteger(precision) ? precision : pip;
 
-const digit=digitOf(value,pip);
+    const digit = digitOf(value, pip);
 
-prices.push(value);
-digits.push(digit);
-times.push(epoch??null);
+    // Count every accepted live tick.
+    // This counter does not reset when the arrays reach MAX_TICKS.
+    tickSequence++;
 
-if(prices.length>MAX_TICKS) {
-prices.shift();
-digits.shift();
-times.shift();
-}
+    prices.push(value);
+    digits.push(digit);
+    times.push(epoch ?? null);
 
-evaluatePendingPredictions(digit);
+    if (prices.length > MAX_TICKS) {
+        prices.shift();
+        digits.shift();
+        times.shift();
+    }
 
-schedulePredictions();
+    // Keep the existing V3 prediction validation.
+    evaluatePendingPredictions(digit);
 
-$("price").textContent=priceText(value);
+    // Check whether the locked contract prediction has expired.
+    evaluateActiveContractPrediction(digit, value);
 
-flashDigit(digit);
+    schedulePredictions();
 
-$("ticks").textContent=digits.length;
+    $("price").textContent = priceText(value);
 
-$("epoch").textContent=epoch
-?new Date(epoch*1000).toLocaleTimeString()
-:"Live";
+    flashDigit(digit);
 
-$("sample").textContent=
-digits.length>=MIN_SAMPLE?"READY":"COLLECTING";
+    $("ticks").textContent = digits.length;
 
-update();
+    $("epoch").textContent = epoch
+        ? new Date(epoch * 1000).toLocaleTimeString()
+        : "Live";
+
+    $("sample").textContent =
+        digits.length >= MIN_SAMPLE ? "READY" : "COLLECTING";
+
+    update();
 }
 
 /* Digit distribution */
