@@ -464,6 +464,64 @@ grid-template-columns:1fr;
 .big-digit{font-size:clamp(78px,23vw,112px)}
 .metric strong{font-size:16px}
 }
+    /* =================================
+   PHASE 1: PREMIUM LIVE DIGIT
+================================= */
+
+#bigdigit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 130px;
+    min-height: 130px;
+
+    font-size: clamp(85px, 15vw, 125px);
+    font-weight: 1000;
+    line-height: 1;
+
+    color: #00f5ff;
+
+    text-shadow:
+        0 0 8px #00f5ff,
+        0 0 18px #00cfff,
+        0 0 35px #008cff,
+        0 0 60px #0055ff;
+
+    filter: drop-shadow(0 0 15px #00eaff);
+
+    transition: color 0.2s ease;
+    will-change: transform;
+}
+
+#bigdigit.digit-pop {
+    animation: liveDigitPop 0.38s cubic-bezier(.17,.67,.35,1.5);
+}
+
+@keyframes liveDigitPop {
+    0% {
+        transform: scale(0.65) rotate(-8deg);
+        opacity: 0.35;
+    }
+
+    55% {
+        transform: scale(1.3) rotate(4deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@media(max-width:600px) {
+    #bigdigit {
+        min-width: 110px;
+        min-height: 110px;
+        font-size: 90px;
+    }
+}
 </style>
 </head>
 
@@ -2585,7 +2643,48 @@ $("exportAccuracy").addEventListener("click",exportAccuracy);
 renderHistory();
 renderAccuracy();
 update();
+/* =================================
+   PHASE 1: LIVE DIGIT ANIMATION
+================================= */
 
+(function setupLiveDigitAnimation() {
+
+    const liveDigit = document.getElementById("bigdigit");
+
+    if (!liveDigit) {
+        console.warn("Live digit display not found.");
+        return;
+    }
+
+    let previousDigit = liveDigit.textContent.trim();
+
+    const observer = new MutationObserver(() => {
+
+        const currentDigit = liveDigit.textContent.trim();
+
+        if (
+            currentDigit !== previousDigit &&
+            /^[0-9]$/.test(currentDigit)
+        ) {
+
+            previousDigit = currentDigit;
+
+            liveDigit.classList.remove("digit-pop");
+
+            // Restart the animation
+            void liveDigit.offsetWidth;
+
+            liveDigit.classList.add("digit-pop");
+        }
+    });
+
+    observer.observe(liveDigit, {
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
+
+})();
 </script>
 
 </body>
