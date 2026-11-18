@@ -1424,7 +1424,346 @@ ranking,
 model
 };
 }
+/* ==========================================
+   PHASE 3: BLENDED DIGIT FORECAST ENGINE
+========================================== */
 
+function buildContractDistribution(array, horizon) {
+
+    const forecast = futureForecast(array, horizon);
+
+    if (
+        !forecast ||
+        !forecast.ranking ||
+        forecast.ranking.length === 0
+    ) {
+        return null;
+    }
+
+    // Markov forecast distribution
+    const markovScores = Array(10).fill(0);
+
+    forecast.ranking.forEach(item => {
+        markovScores[item.digit] = item.score;
+    });
+
+    // Recent digit distribution
+    const recent = array.slice(-200);
+
+    const counts = Array(10).fill(0);
+
+    recent.forEach(digit => {
+
+        if (digit >= 0 && digit <= 9) {
+            counts[digit]++;
+        }
+
+    });
+
+    const total = recent.length || 1;
+
+    // Blend the two models
+    const blended = Array(10).fill(0);
+
+    for (let digit = 0; digit < 10; digit++) {
+
+        const recentShare =
+            (counts[digit] / total) * 100;
+
+        blended[digit] =
+            (markovScores[digit] * 0.70) +
+            (recentShare * 0.30);
+
+    }
+
+    // Normalize the distribution
+    const blendedTotal =
+        blended.reduce((a, b) => a + b, 0);
+
+    if (blendedTotal > 0) {
+
+        for (let digit = 0; digit < 10; digit++) {
+
+            blended[digit] =
+                (blended[digit] / blendedTotal) * 100;
+
+        }
+
+    }
+
+    const ranking = blended
+        .map((score, digit) => ({
+            digit,
+            score
+        }))
+        .sort((a, b) => b.score - a.score);
+
+    return {
+
+        horizon,
+        ranking,
+        distribution: blended,
+        model: forecast.model
+
+    };
+
+}
+
+
+/* ==========================================
+   PHASE 3: RISE/FALL ANALYSIS ENGINE
+========================================== */
+
+function analyseRiseFall(horizon) {
+
+    const t = technicalAnalysis(prices);
+
+    let riseVotes = 0;
+    let fallVotes = 0;
+
+    const details = [];
+
+    // EMA direction
+    if (t.ema9 !== null && t.ema21 !== null) {
+
+        if (t.ema9 > t.ema21) {
+
+            riseVotes++;
+            details.push("EMA: bullish");
+
+        } else if (t.ema9 < t.ema21) {
+
+            fallVotes++;
+            details.push("EMA: bearish");
+
+        } else {
+
+            details.push("EMA: neutral");
+
+        }
+
+    }
+
+    // RSI direction
+    if (t.rsi !== null) {
+
+        if (t.rsi > 55) {
+
+            riseVotes++;
+            details.push("RSI: positive momentum");
+
+        } else if (t.rsi < 45) {
+
+            fallVotes++;
+            details.push("RSI: negative momentum");
+
+        } else {
+
+            details.push("RSI: neutral");
+
+        }
+
+    }
+
+    // Short-term price direction
+    if (prices.length > horizon) {
+
+        const change =
+            prices.at(-1) -
+            prices.at(-1 - horizon);
+
+        if (change > 0) {
+
+            riseVotes++;
+            details.push("Short-term movement: UP");
+
+        } else if (change < 0) {
+
+            fallVotes++;
+            details.push("Short-term movement: DOWN");
+
+        }
+
+    }
+
+    // Longer-term price direction
+    if (prices.length > 20) {
+
+        const change =
+            prices.at(-1) -
+            prices.at(-21);
+
+        if (change > 0) {
+
+            riseVotes++;
+            details.push("Long-term movement: UP");
+
+        } else if (change < 0) {
+
+            fallVotes++;
+            details.push("Long-term movement: DOWN");
+
+        }
+
+    }
+
+    const totalVotes = riseVotes + fallVotes;
+
+    const difference =
+        Math.abs(riseVotes - fallVotes);
+
+    let prediction = "WAIT";
+
+    if (riseVotes > fallVotes) {
+        prediction = "RISE";
+    }
+
+    if (fallVotes > riseVotes) {
+        prediction = "FALL";
+    }
+
+    const agreement = totalVotes > 0
+        ? (Math.max(riseVotes, fallVotes) / totalVotes) * 100
+        : 0;
+
+    const qualified =
+        totalVotes >= 3 &&
+        difference >= 2 &&
+        agreement >= 75;
+
+    return {
+
+        prediction,
+        score: agreement,
+        riseVotes,
+        fallVotes,
+        qualified,
+        details
+
+    };
+
+}
+
+
+/* ==========================================
+   PHASE 3: OVER/UNDER ANALYSIS ENGINE
+========================================== */
+
+function analyseOverUnder(distribution, barrier) {
+
+    let over = 0;
+    let under = 0;
+
+    for (let digit = 0; digit <= 9; digit++) {
+
+        if (digit > barrier) {
+            over += distribution[digit];
+        }
+
+        if (digit < barrier) {
+            under += distribution[digit];
+        }
+
+    }
+
+    const total = over + under;
+
+    const overScore =
+        total > 0 ? (over / total) * 100 : 0;
+
+    const underScore =
+        total > 0 ? (under / total) * 100 : 0;
+
+    let prediction = "WAIT";
+    let score = 0;
+
+    if (overScore > underScore) {
+
+        prediction = "OVER";
+        score = overScore;
+
+    } else if (underScore > overScore) {
+
+        prediction = "UNDER";
+        score = underScore;
+
+    }
+
+    // Barriers 0 and 9 leave only one possible side.
+    // Avoid treating such a forced outcome as an AI edge.
+    const validBarrier = barrier >= 1 && barrier <= 8;
+
+    const qualified =
+        validBarrier &&
+        score >= 70;
+
+    return {
+
+        prediction,
+        score,
+        overScore,
+        underScore,
+        barrier,
+        qualified,
+        validBarrier
+
+    };
+
+}
+
+
+/* ==========================================
+   PHASE 3: MATCHES/DIFFERS ANALYSIS ENGINE
+========================================== */
+
+function analyseMatchesDiffers(distribution, selectedDigit) {
+
+    const target = Number(selectedDigit);
+
+    const matchScore = distribution[target];
+
+    const differScore = 100 - matchScore;
+
+    let prediction = "WAIT";
+    let score = 0;
+
+    if (matchScore >= differScore) {
+
+        prediction = "MATCHES";
+        score = matchScore;
+
+    } else {
+
+        prediction = "DIFFERS";
+        score = differScore;
+
+    }
+
+    /*
+       Matches requires strong concentration
+       on the selected digit.
+
+       Differs requires an even stronger
+       model share to avoid weak signals.
+    */
+
+    const qualified =
+        prediction === "MATCHES"
+        ? matchScore >= 65
+        : differScore >= 95;
+
+    return {
+
+        prediction,
+        target,
+        matchScore,
+        differScore,
+        score,
+        qualified
+
+    };
+
+}
 function makeForecast(array) {
 if(array.length<MIN_SAMPLE)return null;
 
@@ -2106,14 +2445,19 @@ let lastAIScanSignature = "";
 /* ==========================================
    PHASE 2: UPGRADED AI SCANNER
 ========================================== */
+        /* ==========================================
+   PHASE 3: INTELLIGENT AI SCANNER
+========================================== */
 
 function runAIScan() {
 
     if (digits.length < MIN_SAMPLE) {
+
         $("aiResult").innerHTML = `
             <h2 class="gold">MORE DATA NEEDED</h2>
             Collect at least ${MIN_SAMPLE} ticks first.
         `;
+
         return;
     }
 
@@ -2121,10 +2465,12 @@ function runAIScan() {
         market + "|" + digits.length + "|" + digits.at(-1);
 
     if (signature === lastAIScanSignature) {
+
         $("aiResult").innerHTML = `
             <h2 class="gold">WAIT FOR NEW DATA</h2>
-            Wait for a new market tick before scanning again.
+            Wait for another market tick before scanning.
         `;
+
         return;
     }
 
@@ -2132,18 +2478,30 @@ function runAIScan() {
 
     const horizon = Number($("aiHorizon").value);
 
-    const forecast = futureForecast(digits, horizon);
+    const forecast =
+        buildContractDistribution(digits, horizon);
 
-    if (!forecast || !forecast.ranking ||
-        forecast.ranking.length === 0) {
+    if (!forecast) {
+
+        $("aiResult").innerHTML = `
+            <h2 class="gold">FORECAST UNAVAILABLE</h2>
+            Collect more market information.
+        `;
+
         return;
     }
 
-    let prediction = "";
+    let prediction = "WAIT";
     let score = 0;
-    let explanation = "";
     let qualified = false;
-    let targetDigit = forecast.ranking[0].digit;
+    let explanation = "";
+
+    let displayDigit =
+        forecast.ranking[0].digit;
+
+    const distribution =
+        forecast.distribution;
+
 
     /* =================================
        RISE / FALL
@@ -2151,68 +2509,22 @@ function runAIScan() {
 
     if (selectedContract === "RISE_FALL") {
 
-        const t = technicalAnalysis();
+        const result =
+            analyseRiseFall(horizon);
 
-        let riseVotes = 0;
-        let fallVotes = 0;
-
-        if (t.ema9 !== null && t.ema21 !== null) {
-
-            if (t.ema9 > t.ema21) riseVotes++;
-            if (t.ema9 < t.ema21) fallVotes++;
-
-        }
-
-        if (t.rsi !== null) {
-
-            if (t.rsi > 55) riseVotes++;
-            if (t.rsi < 45) fallVotes++;
-
-        }
-
-        if (prices.length > horizon) {
-
-            const change =
-                prices.at(-1) - prices.at(-1-horizon);
-
-            if (change > 0) riseVotes++;
-            if (change < 0) fallVotes++;
-
-        }
-
-        if (prices.length > 20) {
-
-            const change =
-                prices.at(-1) - prices.at(-21);
-
-            if (change > 0) riseVotes++;
-            if (change < 0) fallVotes++;
-
-        }
-
-        const totalVotes = riseVotes + fallVotes;
-
-        if (riseVotes > fallVotes) {
-            prediction = "RISE";
-        } else if (fallVotes > riseVotes) {
-            prediction = "FALL";
-        }
-
-        score = totalVotes > 0
-            ? (Math.max(riseVotes, fallVotes) / totalVotes) * 100
-            : 0;
-
-        qualified =
-            totalVotes >= 3 &&
-            Math.abs(riseVotes - fallVotes) >= 2;
+        prediction = result.prediction;
+        score = result.score;
+        qualified = result.qualified;
 
         explanation = `
-            Rise signals: ${riseVotes}/4.<br>
-            Fall signals: ${fallVotes}/4.<br>
-            Analysis combines EMA, RSI and price movement.
+            Rise votes: ${result.riseVotes}/4.<br>
+            Fall votes: ${result.fallVotes}/4.<br><br>
+
+            ${result.details.join("<br>")}
         `;
 
     }
+
 
     /* =================================
        OVER / UNDER
@@ -2220,44 +2532,33 @@ function runAIScan() {
 
     else if (selectedContract === "OVER_UNDER") {
 
-        const barrier = Number($("barrierDigit").value);
+        const barrier =
+            Number($("barrierDigit").value);
 
-        let over = 0;
-        let under = 0;
+        const result =
+            analyseOverUnder(distribution, barrier);
 
-        forecast.ranking.forEach(item => {
-
-            if (item.digit > barrier) {
-                over += item.score;
-            }
-
-            if (item.digit < barrier) {
-                under += item.score;
-            }
-
-        });
-
-        const total = over + under;
-
-        if (over > under) {
-            prediction = "OVER";
-            score = total > 0 ? (over / total) * 100 : 0;
-
-        } else if (under > over) {
-            prediction = "UNDER";
-            score = total > 0 ? (under / total) * 100 : 0;
-        }
-
-        qualified = score >= 65;
+        prediction = result.prediction;
+        score = result.score;
+        qualified = result.qualified;
 
         explanation = `
-            Barrier: ${barrier}.<br>
-            Over model share: ${over.toFixed(2)}%.<br>
-            Under model share: ${under.toFixed(2)}%.<br>
+            Barrier: ${barrier}.<br><br>
+
+            Over model share:
+            ${result.overScore.toFixed(2)}%.<br>
+
+            Under model share:
+            ${result.underScore.toFixed(2)}%.<br><br>
+
             Equality with the barrier is excluded.
+            ${result.validBarrier
+                ? ""
+                : "<br>Boundary barrier: no qualified signal."}
         `;
 
     }
+
 
     /* =================================
        MATCHES / DIFFERS
@@ -2265,54 +2566,43 @@ function runAIScan() {
 
     else if (selectedContract === "MATCHES_DIFFERS") {
 
-        const selectedDigit = $("targetDigit").value;
+        const selectedDigit =
+            $("targetDigit").value;
 
-        if (selectedDigit === "AUTO") {
+        const target =
+            selectedDigit === "AUTO"
+            ? forecast.ranking[0].digit
+            : Number(selectedDigit);
 
-            targetDigit = forecast.ranking[0].digit;
+        displayDigit = target;
 
-        } else {
+        const result =
+            analyseMatchesDiffers(distribution, target);
 
-            targetDigit = Number(selectedDigit);
+        prediction =
+            result.prediction + " · DIGIT " + target;
 
-        }
-
-        const matchingItem = forecast.ranking.find(
-            item => item.digit === targetDigit
-        );
-
-        const matchScore = matchingItem
-            ? matchingItem.score
-            : 0;
-
-        const differScore = 100 - matchScore;
-
-        if (matchScore > differScore) {
-
-            prediction = "MATCHES";
-            score = matchScore;
-
-        } else {
-
-            prediction = "DIFFERS";
-            score = differScore;
-
-        }
-
-        qualified = score >= 65;
+        score = result.score;
+        qualified = result.qualified;
 
         explanation = `
-            Target digit: ${targetDigit}.<br>
-            Match model share: ${matchScore.toFixed(2)}%.<br>
-            Differ model share: ${differScore.toFixed(2)}%.
-        `;
+            Target digit: ${target}.<br><br>
 
-        prediction += " · DIGIT " + targetDigit;
+            Matches model share:
+            ${result.matchScore.toFixed(2)}%.<br>
+
+            Differs model share:
+            ${result.differScore.toFixed(2)}%.<br><br>
+
+            Automatic selection:
+            ${selectedDigit === "AUTO" ? "YES" : "NO"}.
+        `;
 
     }
 
+
     /* =================================
-       MODEL AGREEMENT LABEL
+       AGREEMENT GRADE
     ================================= */
 
     const grade =
@@ -2321,20 +2611,9 @@ function runAIScan() {
         score >= 65 ? "MODERATE AGREEMENT" :
         "LOW AGREEMENT";
 
-    /* =================================
-       PREDICTED DIGIT DISPLAY
-    ================================= */
-
-    const displayDigit =
-        selectedContract === "MATCHES_DIFFERS"
-        ? targetDigit
-        : forecast.ranking[0].digit;
-
-    const contractName =
-        selectedContract.replace("_", " / ");
 
     /* =================================
-       DISPLAY RESULTS
+       AI RESULT DISPLAY
     ================================= */
 
     $("aiResult").innerHTML = `
@@ -2359,6 +2638,7 @@ function runAIScan() {
 
         </div>
 
+
         <div class="prediction-contract">
 
             <div class="prediction-caption">
@@ -2366,14 +2646,15 @@ function runAIScan() {
             </div>
 
             <h2 class="${qualified ? "green" : "gold"}">
-                ${qualified ? prediction : "NO QUALIFIED SIGNAL"}
+
+                ${qualified
+                    ? prediction
+                    : "NO QUALIFIED SIGNAL"}
+
             </h2>
 
-            <span class="muted">
-                ${contractName}
-            </span>
-
         </div>
+
 
         <div class="cards">
 
@@ -2399,24 +2680,57 @@ function runAIScan() {
 
         </div>
 
+
         <div class="result">
 
-            <b>MODEL ANALYSIS</b><br><br>
+            <b>AI MODEL ANALYSIS</b><br><br>
 
             ${explanation}
 
         </div>
 
+
+        <div class="result">
+
+            <b>TOP FIVE DIGIT FORECASTS</b><br><br>
+
+            ${forecast.ranking.slice(0, 5).map(item => `
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:6px 0;
+                    border-bottom:1px solid #30435e;
+                ">
+
+                    <span>DIGIT ${item.digit}</span>
+
+                    <strong>
+                        ${item.score.toFixed(2)}%
+                    </strong>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+
         <div class="muted prediction-warning">
 
-            The predicted digit is a statistical forecast.
-            For Rise/Fall, it is separate from the price-direction
-            prediction. Model agreement is not a verified
-            probability of winning.
+            Model agreement represents the model's
+            internal score, not a verified probability
+            of winning. Predictions are experimental
+            and require independent validation.
 
         </div>
 
     `;
+
+
+    /* =================================
+       UPDATE EXISTING DASHBOARD METRICS
+    ================================= */
 
     $("confidenceGrade").textContent = grade;
 
@@ -2426,9 +2740,7 @@ function runAIScan() {
     $("scanresult").textContent =
         prediction + " · " + score.toFixed(1) + "%";
 
-}
-
-            
+}    
 
 /* Scan */
 
