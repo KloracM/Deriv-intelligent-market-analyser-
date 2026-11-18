@@ -2103,12 +2103,16 @@ $("comparisonTable").appendChild(row);
 let selectedContract = "RISE_FALL";
 let lastAIScanSignature = "";
 
+/* ==========================================
+   PHASE 2: UPGRADED AI SCANNER
+========================================== */
+
 function runAIScan() {
 
-    if(digits.length < MIN_SAMPLE) {
+    if (digits.length < MIN_SAMPLE) {
         $("aiResult").innerHTML = `
-        <h2 class="gold">MORE DATA NEEDED</h2>
-        Collect at least ${MIN_SAMPLE} ticks first.
+            <h2 class="gold">MORE DATA NEEDED</h2>
+            Collect at least ${MIN_SAMPLE} ticks first.
         `;
         return;
     }
@@ -2116,11 +2120,10 @@ function runAIScan() {
     const signature =
         market + "|" + digits.length + "|" + digits.at(-1);
 
-    if(signature === lastAIScanSignature) {
+    if (signature === lastAIScanSignature) {
         $("aiResult").innerHTML = `
-        <h2 class="gold">WAIT FOR NEW DATA</h2>
-        The previous scan used the latest available tick.
-        Wait for a new tick before scanning again.
+            <h2 class="gold">WAIT FOR NEW DATA</h2>
+            Wait for a new market tick before scanning again.
         `;
         return;
     }
@@ -2128,210 +2131,305 @@ function runAIScan() {
     lastAIScanSignature = signature;
 
     const horizon = Number($("aiHorizon").value);
-    const forecast = futureForecast(digits,horizon);
 
-    if(!forecast) return;
+    const forecast = futureForecast(digits, horizon);
+
+    if (!forecast || !forecast.ranking ||
+        forecast.ranking.length === 0) {
+        return;
+    }
 
     let prediction = "";
     let score = 0;
     let explanation = "";
     let qualified = false;
+    let targetDigit = forecast.ranking[0].digit;
 
-    /* RISE / FALL */
+    /* =================================
+       RISE / FALL
+    ================================= */
 
-    if(selectedContract === "RISE_FALL") {
+    if (selectedContract === "RISE_FALL") {
 
         const t = technicalAnalysis();
 
         let riseVotes = 0;
         let fallVotes = 0;
 
-        if(t.ema9 !== null && t.ema21 !== null) {
-            if(t.ema9 > t.ema21) riseVotes++;
-            if(t.ema9 < t.ema21) fallVotes++;
+        if (t.ema9 !== null && t.ema21 !== null) {
+
+            if (t.ema9 > t.ema21) riseVotes++;
+            if (t.ema9 < t.ema21) fallVotes++;
+
         }
 
-        if(t.rsi !== null) {
-            if(t.rsi > 55) riseVotes++;
-            if(t.rsi < 45) fallVotes++;
+        if (t.rsi !== null) {
+
+            if (t.rsi > 55) riseVotes++;
+            if (t.rsi < 45) fallVotes++;
+
         }
 
-        if(prices.length > horizon) {
+        if (prices.length > horizon) {
+
             const change =
                 prices.at(-1) - prices.at(-1-horizon);
 
-            if(change > 0) riseVotes++;
-            if(change < 0) fallVotes++;
+            if (change > 0) riseVotes++;
+            if (change < 0) fallVotes++;
+
         }
 
-        if(prices.length > 20) {
+        if (prices.length > 20) {
+
             const change =
                 prices.at(-1) - prices.at(-21);
 
-            if(change > 0) riseVotes++;
-            if(change < 0) fallVotes++;
+            if (change > 0) riseVotes++;
+            if (change < 0) fallVotes++;
+
         }
 
-        const strongest =
-            Math.max(riseVotes,fallVotes);
+        const totalVotes = riseVotes + fallVotes;
 
-        score = 50 + (45 * strongest / 4);
-
-        if(riseVotes > fallVotes) {
+        if (riseVotes > fallVotes) {
             prediction = "RISE";
-        } else if(fallVotes > riseVotes) {
+        } else if (fallVotes > riseVotes) {
             prediction = "FALL";
         }
 
-        qualified =
-            strongest >= 3 &&
-            Math.abs(riseVotes-fallVotes) >= 2;
+        score = totalVotes > 0
+            ? (Math.max(riseVotes, fallVotes) / totalVotes) * 100
+            : 0;
 
-        explanation =
-            `Rise signals: ${riseVotes}/4.
-             Fall signals: ${fallVotes}/4.`;
+        qualified =
+            totalVotes >= 3 &&
+            Math.abs(riseVotes - fallVotes) >= 2;
+
+        explanation = `
+            Rise signals: ${riseVotes}/4.<br>
+            Fall signals: ${fallVotes}/4.<br>
+            Analysis combines EMA, RSI and price movement.
+        `;
+
     }
 
-    /* OVER / UNDER */
+    /* =================================
+       OVER / UNDER
+    ================================= */
 
-    else if(selectedContract === "OVER_UNDER") {
+    else if (selectedContract === "OVER_UNDER") {
 
-        const barrier =
-            Number($("barrierDigit").value);
+        const barrier = Number($("barrierDigit").value);
 
         let over = 0;
         let under = 0;
 
         forecast.ranking.forEach(item => {
 
-            if(item.digit > barrier) {
+            if (item.digit > barrier) {
                 over += item.score;
             }
 
-            if(item.digit < barrier) {
+            if (item.digit < barrier) {
                 under += item.score;
             }
 
         });
 
-        if(over > under) {
+        const total = over + under;
+
+        if (over > under) {
             prediction = "OVER";
-            score = over;
-        } else if(under > over) {
+            score = total > 0 ? (over / total) * 100 : 0;
+
+        } else if (under > over) {
             prediction = "UNDER";
-            score = under;
+            score = total > 0 ? (under / total) * 100 : 0;
         }
 
-        qualified = score > 50;
+        qualified = score >= 65;
 
-        explanation =
-            `Barrier: ${barrier}.
-             Over model estimate: ${over.toFixed(2)}%.
-             Under model estimate: ${under.toFixed(2)}%.`;
+        explanation = `
+            Barrier: ${barrier}.<br>
+            Over model share: ${over.toFixed(2)}%.<br>
+            Under model share: ${under.toFixed(2)}%.<br>
+            Equality with the barrier is excluded.
+        `;
+
     }
 
-    /* MATCHES / DIFFERS */
+    /* =================================
+       MATCHES / DIFFERS
+    ================================= */
 
-    else if(selectedContract === "MATCHES_DIFFERS") {
+    else if (selectedContract === "MATCHES_DIFFERS") {
 
-        const selectedDigit =
-            $("targetDigit").value;
+        const selectedDigit = $("targetDigit").value;
 
-        let target;
+        if (selectedDigit === "AUTO") {
 
-        if(selectedDigit === "AUTO") {
-            target = forecast.ranking[0].digit;
+            targetDigit = forecast.ranking[0].digit;
+
         } else {
-            target = Number(selectedDigit);
+
+            targetDigit = Number(selectedDigit);
+
         }
 
-        const matchScore =
-            forecast.ranking.find(
-                item => item.digit === target
-            ).score;
+        const matchingItem = forecast.ranking.find(
+            item => item.digit === targetDigit
+        );
 
-        const differScore = 100-matchScore;
+        const matchScore = matchingItem
+            ? matchingItem.score
+            : 0;
 
-        if(matchScore > differScore) {
+        const differScore = 100 - matchScore;
+
+        if (matchScore > differScore) {
+
             prediction = "MATCHES";
             score = matchScore;
+
         } else {
+
             prediction = "DIFFERS";
             score = differScore;
+
         }
 
-        qualified = score > 50;
+        qualified = score >= 65;
 
-        explanation =
-            `Target digit: ${target}.
-             Match estimate: ${matchScore.toFixed(2)}%.
-             Differ estimate: ${differScore.toFixed(2)}%.`;
+        explanation = `
+            Target digit: ${targetDigit}.<br>
+            Match model share: ${matchScore.toFixed(2)}%.<br>
+            Differ model share: ${differScore.toFixed(2)}%.
+        `;
 
-        prediction += " · DIGIT " + target;
+        prediction += " · DIGIT " + targetDigit;
+
     }
 
+    /* =================================
+       MODEL AGREEMENT LABEL
+    ================================= */
+
     const grade =
-        score >= 90 ? "VERY STRONG" :
-        score >= 80 ? "STRONG" :
-        score >= 65 ? "GOOD" :
-        score >= 50 ? "MODERATE" :
-        "LOW";
+        score >= 85 ? "HIGH AGREEMENT" :
+        score >= 75 ? "GOOD AGREEMENT" :
+        score >= 65 ? "MODERATE AGREEMENT" :
+        "LOW AGREEMENT";
+
+    /* =================================
+       PREDICTED DIGIT DISPLAY
+    ================================= */
+
+    const displayDigit =
+        selectedContract === "MATCHES_DIFFERS"
+        ? targetDigit
+        : forecast.ranking[0].digit;
+
+    const contractName =
+        selectedContract.replace("_", " / ");
+
+    /* =================================
+       DISPLAY RESULTS
+    ================================= */
 
     $("aiResult").innerHTML = `
 
-    <div class="muted">DERIV AI SCANNER · ${market}</div>
-
-    <div class="ai-number">
-    ${qualified ? prediction : "NO SIGNAL"}
-    </div>
-
-    <h2 class="${qualified ? "green" : "gold"}">
-    ${qualified ? "QUALIFIED SIGNAL" : "WAIT · LOW AGREEMENT"}
-    </h2>
-
-    <div class="cards">
-
-        <div class="metric">
-        <small>MODEL SCORE</small>
-        <strong>${score.toFixed(1)}%</strong>
+        <div class="muted ai-market-label">
+            DERIV AI ANALYSER · ${market}
         </div>
 
-        <div class="metric">
-        <small>CONFIDENCE GRADE</small>
-        <strong>${grade}</strong>
+        <div class="prediction-display">
+
+            <div class="prediction-caption">
+                AI PREDICTED DIGIT
+            </div>
+
+            <div class="predicted-digit">
+                ${displayDigit}
+            </div>
+
+            <div class="prediction-caption">
+                TOP DIGIT FORECAST
+            </div>
+
         </div>
 
-        <div class="metric">
-        <small>FORECAST</small>
-        <strong>${horizon} TICKS</strong>
+        <div class="prediction-contract">
+
+            <div class="prediction-caption">
+                CONTRACT PREDICTION
+            </div>
+
+            <h2 class="${qualified ? "green" : "gold"}">
+                ${qualified ? prediction : "NO QUALIFIED SIGNAL"}
+            </h2>
+
+            <span class="muted">
+                ${contractName}
+            </span>
+
         </div>
 
-        <div class="metric">
-        <small>MARKET</small>
-        <strong>${market}</strong>
+        <div class="cards">
+
+            <div class="metric">
+                <small>MODEL AGREEMENT</small>
+                <strong>${score.toFixed(1)}%</strong>
+            </div>
+
+            <div class="metric">
+                <small>AGREEMENT GRADE</small>
+                <strong>${grade}</strong>
+            </div>
+
+            <div class="metric">
+                <small>FORECAST</small>
+                <strong>${horizon} TICKS</strong>
+            </div>
+
+            <div class="metric">
+                <small>MARKET</small>
+                <strong>${market}</strong>
+            </div>
+
         </div>
 
-    </div>
+        <div class="result">
 
-    <div class="result">
-    <b>MODEL ANALYSIS</b><br>
-    ${explanation}
-    </div>
+            <b>MODEL ANALYSIS</b><br><br>
 
-    <div class="muted">
-    Model scores are statistical estimates, not verified
-    probabilities of winning. Validate against future ticks.
-    </div>
+            ${explanation}
+
+        </div>
+
+        <div class="muted prediction-warning">
+
+            The predicted digit is a statistical forecast.
+            For Rise/Fall, it is separate from the price-direction
+            prediction. Model agreement is not a verified
+            probability of winning.
+
+        </div>
 
     `;
 
     $("confidenceGrade").textContent = grade;
+
     $("confidenceScore").textContent =
-        score.toFixed(1)+"%";
+        score.toFixed(1) + "%";
 
     $("scanresult").textContent =
         prediction + " · " + score.toFixed(1) + "%";
+
 }
+
+            
+
 /* Scan */
 
 function runScan() {
