@@ -1268,6 +1268,7 @@ req_id:1
 };
 
 currentSocket.onmessage=event=>{
+console.log("DERIV MESSAGE:", event.data);    
 if(socket!==currentSocket)return;
 
 let data;
