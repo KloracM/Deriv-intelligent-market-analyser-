@@ -1,1 +1,3463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080f1d">
+<title>Deriv Intelligent Market Analyser V3</title>
+
+<style>
+:root{
+--bg:#080f1d;
+--panel:#111e32;
+--panel2:#192943;
+--line:#30435e;
+--text:#edf5ff;
+--muted:#91a5c0;
+--cyan:#00e5ff;
+--green:#00e69a;
+--red:#ff5b75;
+--gold:#ffd166;
+--purple:#b69aff;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:radial-gradient(ellipse at top,#183653,#080f1d 55%);
+color:var(--text);
+font-family:Arial,sans-serif;
+padding-bottom:90px;
+}
+
+header{
+position:sticky;
+top:0;
+z-index:10;
+background:#091525ee;
+border-bottom:1px solid var(--line);
+padding:14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+backdrop-filter:blur(12px);
+}
+
+.logo{
+font-weight:900;
+letter-spacing:1px;
+color:var(--cyan);
+}
+
+.logo span{color:white}
+
+.status{
+font-size:10px;
+font-weight:bold;
+color:var(--gold);
+}
+
+.container{
+max-width:1400px;
+margin:auto;
+padding:12px;
+}
+
+.panel{
+background:linear-gradient(145deg,#13233a,#0e192a);
+border:1px solid var(--line);
+border-radius:14px;
+padding:14px;
+margin-bottom:12px;
+}
+
+h2{
+font-size:13px;
+color:var(--cyan);
+letter-spacing:.8px;
+margin:0 0 13px;
+}
+
+h3{
+font-size:10px;
+color:var(--muted);
+margin:0 0 7px;
+}
+
+select,input,button{
+background:var(--panel2);
+color:white;
+border:1px solid var(--line);
+border-radius:9px;
+padding:12px;
+font-size:13px;
+}
+
+select,input{width:100%}
+
+button{
+font-weight:bold;
+cursor:pointer;
+}
+
+button:disabled{
+opacity:.45;
+cursor:not-allowed;
+}
+
+.primary{
+background:linear-gradient(110deg,#007bb5,#00b9c9);
+border:0;
+}
+
+.danger{background:#582238}
+
+.secondary{background:#253a58}
+
+.market-row{
+display:grid;
+grid-template-columns:1.5fr 1fr;
+gap:12px;
+}
+
+.button-row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:9px;
+}
+
+.metric{
+background:var(--panel2);
+padding:11px;
+border-radius:9px;
+min-width:0;
+}
+
+.metric small{
+font-size:9px;
+color:var(--muted);
+}
+
+.metric strong{
+display:block;
+font-size:18px;
+margin-top:6px;
+overflow-wrap:anywhere;
+}
+
+.hero{
+display:grid;
+grid-template-columns:1fr 1fr;
+align-items:center;
+gap:8px;
+}
+
+.hero-digit{text-align:center}
+
+.big-digit{
+font-size:clamp(90px,20vw,150px);
+font-weight:900;
+color:var(--cyan);
+text-shadow:0 0 22px #00e5ff88;
+line-height:1.1;
+min-height:1.1em;
+}
+
+.pop{animation:pop .25s ease}
+
+@keyframes pop{
+0%{transform:scale(.6);opacity:.4}
+75%{transform:scale(1.15)}
+100%{transform:scale(1);opacity:1}
+}
+
+.digits{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:7px;
+}
+
+.digit{
+background:var(--panel2);
+border:1px solid var(--line);
+border-radius:9px;
+padding:9px 3px;
+text-align:center;
+}
+
+.digit b{font-size:22px}
+
+.digit small{
+display:block;
+color:var(--muted);
+font-size:9px;
+margin-top:4px;
+}
+
+.digit.hot{border-color:var(--green)}
+.digit.cold{border-color:var(--red)}
+
+.bar{
+height:4px;
+border-radius:5px;
+background:#30425c;
+margin-top:7px;
+overflow:hidden;
+}
+
+.bar i{
+display:block;
+height:100%;
+background:linear-gradient(90deg,#007cb7,var(--cyan));
+}
+
+.split{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+}
+
+.predictions{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px;
+}
+
+.prediction{
+background:var(--panel2);
+border-radius:9px;
+text-align:center;
+padding:12px 4px;
+}
+
+.prediction strong{
+display:block;
+color:var(--cyan);
+font-size:20px;
+margin:8px 0;
+}
+
+.prediction small{
+font-size:9px;
+color:var(--muted);
+}
+
+.result{
+background:#091525;
+border:1px solid var(--line);
+border-radius:9px;
+padding:11px;
+margin-top:9px;
+font-size:12px;
+line-height:1.7;
+overflow-wrap:anywhere;
+}
+
+.muted{color:var(--muted);font-size:10px}
+.green{color:var(--green)}
+.red{color:var(--red)}
+.gold{color:var(--gold)}
+.cyan{color:var(--cyan)}
+
+table{
+border-collapse:collapse;
+width:100%;
+font-size:10px;
+}
+
+td,th{
+padding:8px 5px;
+border-bottom:1px solid var(--line);
+text-align:left;
+}
+
+th{color:var(--cyan)}
+
+.scroll{overflow-x:auto}
+
+.dock{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+z-index:20;
+background:#081321ee;
+border-top:1px solid var(--line);
+padding:9px 12px;
+display:flex;
+align-items:center;
+gap:10px;
+backdrop-filter:blur(12px);
+}
+
+.dock button{
+flex:1;
+padding:15px;
+font-size:15px;
+letter-spacing:.7px;
+}
+
+.dock span{
+font-size:10px;
+color:var(--muted);
+}
+
+footer{
+text-align:center;
+padding:18px;
+color:var(--muted);
+font-size:10px;
+}
+/* V4 CONTRACT SELECTOR */
+
+.contract-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px;
+}
+
+.contract-choice{
+min-height:65px;
+background:#192943;
+border:1px solid #30435e;
+color:#91a5c0;
+font-size:11px;
+transition:.25s;
+}
+
+.contract-choice.active{
+background:linear-gradient(120deg,#006b91,#7029b5);
+border:1px solid #00e5ff;
+color:white;
+box-shadow:0 0 15px #00e5ff66;
+}
+
+.ai-result{
+background:linear-gradient(145deg,#101d34,#071322);
+border:1px solid #00b9c9;
+border-radius:12px;
+padding:18px;
+min-height:110px;
+text-align:center;
+line-height:1.8;
+}
+
+.ai-result .ai-number{
+font-size:48px;
+font-weight:900;
+color:#00e5ff;
+text-shadow:0 0 18px #00e5ff88;
+}
+
+.dock #scan{
+background:linear-gradient(100deg,#007bff,#8a2be2,#00d4ff);
+background-size:200% 200%;
+animation:aiGlow 3s ease infinite;
+border:1px solid #00e5ff;
+box-shadow:0 0 18px #00e5ff66;
+font-size:17px;
+font-weight:900;
+}
+
+@keyframes aiGlow{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
+}
+/* FLOATING AI ORB */
+
+.ai-orb{
+    position:fixed;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    z-index:50;
+    font-size:27px;
+    color:white;
+    border:2px solid #00e5ff;
+    background:radial-gradient(circle,#8a2be2,#006b91);
+    box-shadow:0 0 12px #00e5ff,0 0 30px #8a2be2;
+    animation:orbPulse 2s infinite;
+}
+
+@keyframes orbPulse{
+    0%,100%{box-shadow:0 0 12px #00e5ff,0 0 25px #8a2be2}
+    50%{box-shadow:0 0 25px #00e5ff,0 0 45px #8a2be2}
+}
+
+.ai-popup{
+    display:none;
+    position:fixed;
+    right:88px;
+    top:50%;
+    transform:translateY(-50%);
+    width:min(310px,calc(100vw - 110px));
+    max-height:80vh;
+    overflow-y:auto;
+    z-index:49;
+    background:#101d34;
+    border:1px solid #00e5ff;
+    border-radius:15px;
+    padding:13px;
+    box-shadow:0 0 25px #00e5ff55;
+}
+
+.ai-popup.open{
+    display:block;
+}
+
+.ai-popup-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:#00e5ff;
+    margin-bottom:12px;
+}
+
+.ai-scan-button{
+    width:100%;
+    margin:12px 0;
+    padding:13px;
+    background:linear-gradient(100deg,#007bff,#8a2be2);
+    border:1px solid #00e5ff;
+    color:white;
+    font-weight:900;
+}
+    .ai-orb.active {
+    background:radial-gradient(circle,#00e69a,#006b91);
+    box-shadow:0 0 20px #00e69a,0 0 40px #00e69a;
+}
+
+.ai-orb:active {
+    transform:translateY(-50%) scale(.94);
+}
+
+.ai-popup {
+    max-width:calc(100vw - 110px);
+}
+
+.expiry-countdown {
+    display:block;
+    margin-top:8px;
+}
+@media(max-width:450px){
+.contract-grid{
+grid-template-columns:1fr;
+}
+}
+@media(max-width:650px){
+.container{padding:8px}
+.panel{padding:11px}
+.market-row{grid-template-columns:1fr}
+.cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.hero{grid-template-columns:1fr 1fr}
+.big-digit{font-size:clamp(78px,23vw,112px)}
+.metric strong{font-size:16px}
+}
+    /* =================================
+   PHASE 1: SOFT PREMIUM LIVE DIGIT
+================================= */
+
+#bigdigit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 130px;
+    min-height: 130px;
+
+    font-size: clamp(85px, 15vw, 125px);
+    font-weight: 900;
+    line-height: 1;
+
+    color: #62dce8;
+
+    text-shadow:
+        0 0 5px rgba(0, 220, 235, 0.35),
+        0 0 12px rgba(0, 180, 210, 0.18);
+
+    filter: none;
+    transition: color 0.25s ease;
+    will-change: transform;
+}
+
+#bigdigit.digit-pop {
+    animation: liveDigitPop 0.38s ease-out;
+}
+
+@keyframes liveDigitPop {
+    0% {
+        transform: scale(0.88);
+        opacity: 0.65;
+    }
+
+    55% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@media(max-width:600px) {
+    #bigdigit {
+        min-width: 110px;
+        min-height: 110px;
+        font-size: 90px;
+    }
+}
+    /* PHASE 4: LOCKED PREDICTION PANEL */
+
+.expiry-panel {
+    margin: 18px 0;
+    padding: 16px;
+    border: 1px solid rgba(0, 220, 200, 0.35);
+    border-radius: 14px;
+    background: rgba(0, 180, 160, 0.07);
+    text-align: center;
+}
+
+.expiry-panel h3 {
+    margin-top: 0;
+}
+
+.expiry-panel div {
+    margin: 9px 0;
+}
+
+#aiRemaining {
+    color: #00e5ff;
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.expiry-result.hit {
+    color: #00e676;
+}
+
+.expiry-result.miss {
+    color: #ff5252;
+}
+
+.expiry-result.void {
+    color: #ffc107;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">DERIV <span>INTELLIGENCE V3</span></div>
+<div id="status" class="status">● READY</div>
+</header>
+
+<main class="container">
+
+<section class="panel">
+<h2>MARKET CONTROL CENTRE</h2>
+
+<div class="market-row">
+<div>
+<h3>SELECT ONE MARKET</h3>
+<select id="market">
+<option value="1HZ10V">Volatility 10 (1s)</option>
+<option value="1HZ25V">Volatility 25 (1s)</option>
+<option value="1HZ50V">Volatility 50 (1s)</option>
+<option value="1HZ75V">Volatility 75 (1s)</option>
+<option value="1HZ100V">Volatility 100 (1s)</option>
+<option value="R_10">Volatility 10</option>
+<option value="R_25">Volatility 25</option>
+<option value="R_50">Volatility 50</option>
+<option value="R_75">Volatility 75</option>
+<option value="R_100">Volatility 100</option>
+</select>
+</div>
+
+<div>
+<h3>CONNECTION</h3>
+<div class="button-row">
+<button id="connect" class="primary">CONNECT</button>
+<button id="disconnect" class="danger">DISCONNECT</button>
+</div>
+</div>
+</div>
+</section>
+<!-- V4 CONTRACT SELECTOR -->
+
+<section class="panel">
+<h2>CONTRACT SELECTOR</h2>
+
+<div class="contract-grid">
+
+<button class="contract-choice active"
+data-contract="RISE_FALL">
+📈 RISE / FALL
+</button>
+
+<button class="contract-choice"
+data-contract="OVER_UNDER">
+🔢 OVER / UNDER
+</button>
+
+<button class="contract-choice"
+data-contract="MATCHES_DIFFERS">
+🎯 MATCHES / DIFFERS
+</button>
+
+<button class="contract-choice"
+data-contract="EVEN_ODD">
+⚖️ EVEN / ODD
+</button>
+
+</div>
+
+<div id="contractSettings" class="result">
+
+<div id="barrierControl" style="display:none">
+<h3>SELECT BARRIER DIGIT</h3>
+<select id="barrierDigit">
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5" selected>5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+</select>
+</div>
+
+<div id="digitControl" style="display:none">
+<h3>SELECT TARGET DIGIT</h3>
+<select id="targetDigit">
+<option value="AUTO">AI SELECTS DIGIT</option>
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+</select>
+</div>
+
+<h3 style="margin-top:12px">FORECAST HORIZON</h3>
+    
+<select id="aiHorizon">
+<option value="5">5 TICKS</option>
+<option value="10">10 TICKS</option>
+<option value="20">20 TICKS</option>
+</select>
+<label for="aiExpiry">CONTRACT EXPIRY</label>
+
+<select id="aiExpiry">
+    <option value="1">1 TICK</option>
+    <option value="2">2 TICKS</option>
+    <option value="3">3 TICKS</option>
+    <option value="5" selected>5 TICKS</option>
+    <option value="10">10 TICKS</option>
+    <option value="20">20 TICKS</option>
+</select>
+</div>
+
+</section>
+
+<!-- V4 FLOATING AI SCANNER -->
+
+<div id="aiPopup" class="ai-popup">
+
+    <div class="ai-popup-head">
+        <b>✦ DERIV AI SCANNER</b>
+        <button id="closeAIPopup" type="button">✕</button>
+    </div>
+
+    <div id="aiResult" class="ai-result">
+        <div class="muted">
+            Select a contract and press AI SCAN.
+        </div>
+    </div>
+
+    <button id="scan" class="ai-scan-button" type="button">
+        ✦ AI SCAN ✦
+    </button>
+
+    <div class="muted">
+        Model predictions are estimates, not guaranteed wins.
+    </div>
+
+</div>
+
+<section class="cards">
+<div class="metric"><small>LAST PRICE</small><strong id="price">---</strong></div>
+<div class="metric"><small>LAST DIGIT</small><strong id="lastdigit" class="cyan">---</strong></div>
+<div class="metric"><small>BUFFERED TICKS</small><strong id="ticks">0</strong></div>
+<div class="metric"><small>MARKET TREND</small><strong id="trend">---</strong></div>
+</section>
+
+<section class="panel hero">
+<div class="hero-digit">
+<h2>LIVE LAST DIGIT</h2>
+<div id="bigdigit" class="big-digit">--</div>
+<div id="updated" class="muted">Waiting for ticks</div>
+</div>
+
+<div>
+<h2>LIVE SNAPSHOT</h2>
+<div class="metric">
+<small>ACTIVE MARKET</small>
+<strong id="active">1HZ10V</strong>
+</div>
+<div class="metric" style="margin-top:8px">
+<small>LAST TICK TIME</small>
+<strong id="epoch">---</strong>
+</div>
+<div class="metric" style="margin-top:8px">
+<small>DATA SAMPLE</small>
+<strong id="sample">WAITING</strong>
+</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>DIGIT DISTRIBUTION · 0–9</h2>
+<div id="digitgrid" class="digits"></div>
+
+<div class="result">
+<b class="green">HOT DIGITS:</b> <span id="hot">---</span><br>
+<b class="red">COLD DIGITS:</b> <span id="cold">---</span><br>
+<b class="gold">MOST OVERDUE:</b> <span id="overdue">---</span>
+<div class="muted">
+Past frequency and overdue status do not guarantee future outcomes.
+</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>EVEN / ODD BALANCE</h2>
+<div class="cards">
+<div class="metric"><small>EVEN</small><strong id="evenpct">0%</strong></div>
+<div class="metric"><small>ODD</small><strong id="oddpct">0%</strong></div>
+<div class="metric"><small>EVEN COUNT</small><strong id="evencount">0</strong></div>
+<div class="metric"><small>ODD COUNT</small><strong id="oddcount">0</strong></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>TECHNICAL MARKET INTELLIGENCE</h2>
+<div class="cards">
+<div class="metric"><small>EMA 9</small><strong id="ema9">---</strong></div>
+<div class="metric"><small>EMA 21</small><strong id="ema21">---</strong></div>
+<div class="metric"><small>RSI · 14</small><strong id="rsi">---</strong></div>
+<div class="metric"><small>MOMENTUM · 20 TICKS</small><strong id="momentum">---</strong></div>
+<div class="metric"><small>SUPPORT · 50 TICKS</small><strong id="support">---</strong></div>
+<div class="metric"><small>RESISTANCE · 50 TICKS</small><strong id="resistance">---</strong></div>
+<div class="metric"><small>AVG ABS MOVEMENT</small><strong id="movement">---</strong></div>
+<div class="metric"><small>MARKET CONDITION</small><strong id="condition">---</strong></div>
+</div>
+</section>
+
+<section class="panel">
+<h2>FREQUENCY & DIGIT TRANSITIONS</h2>
+<div class="split">
+<div class="metric">
+<small>TOP · LAST 100 TICKS</small>
+<strong id="top100">---</strong>
+</div>
+<div class="metric">
+<small>TOP · LAST 300 TICKS</small>
+<strong id="top300">---</strong>
+</div>
+</div>
+<div class="result" id="transitions">Collecting transition data...</div>
+</section>
+<div class="result" id="candidate">
+Collecting candidate rankings...
+</div>
+<!-- NEW: FUTURE TICK ANALYSIS -->
+
+<section class="panel">
+<h2>ADVANCED FUTURE TICK ANALYSIS</h2>
+
+<div class="predictions">
+<div class="prediction">
+<small>5 TICKS AHEAD</small>
+<strong id="future5">---</strong>
+<small id="future5score">Waiting for data</small>
+</div>
+
+<div class="prediction">
+<small>10 TICKS AHEAD</small>
+<strong id="future10">---</strong>
+<small id="future10score">Waiting for data</small>
+</div>
+
+<div class="prediction">
+<small>20 TICKS AHEAD</small>
+<strong id="future20">---</strong>
+<small id="future20score">Waiting for data</small>
+</div>
+</div>
+
+<div class="result" id="futureDetails">
+Collecting sufficient tick history.
+</div>
+
+<div class="muted">
+Multi-step Markov transition rankings. These are statistical estimates, not guaranteed predictions.
+</div>
+</section>
+<!-- V4 ADVANCED INTELLIGENCE -->
+
+<section class="panel">
+<h2>V4 ADVANCED INTELLIGENCE</h2>
+
+<div class="cards">
+<div class="metric">
+<small>MODEL CONFIDENCE</small>
+<strong id="confidenceGrade">WAITING</strong>
+</div>
+
+<div class="metric">
+<small>CONFIDENCE SCORE</small>
+<strong id="confidenceScore">---</strong>
+</div>
+
+<div class="metric">
+<small>REPEATED PATTERN</small>
+<strong id="patternCount">---</strong>
+</div>
+
+<div class="metric">
+<small>RECENT BEHAVIOUR</small>
+<strong id="adaptiveMode">WAITING</strong>
+</div>
+</div>
+
+<div class="result" id="confidenceDetails">
+Waiting for sufficient market data.
+</div>
+
+<div class="result" id="patternDetails">
+Pattern recognition is waiting for data.
+</div>
+
+<div class="result" id="adaptiveDetails">
+Adaptive analysis is waiting for data.
+</div>
+</section>
+<section class="panel">
+<h2>AI CONTRACT RESULT TRACKER</h2>
+<div class="cards">
+<div class="metric"><small>HITS</small><strong id="contractHits" class="green">0</strong></div>
+<div class="metric"><small>MISSES</small><strong id="contractMisses" class="red">0</strong></div>
+<div class="metric"><small>VOIDS</small><strong id="contractVoids" class="gold">0</strong></div>
+<div class="metric"><small>COMPLETED</small><strong id="contractTotal">0</strong></div>
+</div>
+<div class="muted">Tracks simulated AI predictions only. It does not represent actual Deriv trades, profit, or payout.</div>
+</section>
+
+<!-- NEW: ACCURACY DASHBOARD -->
+
+<section class="panel">
+<h2>V3 PREDICTION ACCURACY</h2>
+
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>HORIZON</th>
+<th>TESTS</th>
+<th>TOP 1 HITS</th>
+<th>TOP 1 RATE</th>
+<th>TOP 3 HITS</th>
+<th>TOP 3 RATE</th>
+</tr>
+</thead>
+<tbody id="accuracyTable"></tbody>
+</table>
+</div>
+
+<div class="result" id="accuracyNote">
+Accuracy tracking begins as new live ticks arrive.
+</div>
+
+<button id="resetAccuracy" class="secondary" style="margin-top:10px">
+RESET ACCURACY
+</button>
+</section>
+
+<!-- NEW: MARKET COMPARISON -->
+
+<section class="panel">
+<h2>MARKET COMPARISON ENGINE</h2>
+
+<button id="compare" class="primary" style="width:100%">
+COMPARE ALL 10 MARKETS
+</button>
+
+<div class="result" id="compareStatus">
+Connect first, then compare the recent historical behaviour of all ten markets.
+</div>
+
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>MARKET</th>
+<th>TOP DIGIT</th>
+<th>FREQUENCY</th>
+<th>RSI</th>
+<th>TREND</th>
+</tr>
+</thead>
+<tbody id="comparisonTable"></tbody>
+</table>
+</div>
+
+<div class="muted">
+Comparison uses a separate historical sample for each market. It does not mean one market is easier to predict.
+</div>
+</section>
+
+<!-- NEW: SMART ALERTS -->
+
+<section class="panel">
+<h2>SMART MODEL ALERTS</h2>
+
+<div class="split">
+<div>
+<h3>MINIMUM MODEL SCORE (%)</h3>
+<input id="alertThreshold" type="number" min="10" max="100" value="15">
+</div>
+
+<div>
+<h3>ALERT CONTROL</h3>
+<button id="alertToggle" class="primary" style="width:100%">
+ENABLE ALERTS
+</button>
+</div>
+</div>
+
+<div class="result" id="alertStatus">
+Alerts are currently disabled.
+</div>
+
+<button id="notificationPermission" class="secondary" style="margin-top:9px;width:100%">
+ENABLE BROWSER NOTIFICATIONS
+</button>
+</section>
+
+<!-- NEW: EXPORT -->
+
+<section class="panel">
+<h2>EXPORT ANALYSIS REPORTS</h2>
+
+<div class="button-row">
+<button id="exportScans" class="primary">EXPORT SCAN HISTORY</button>
+<button id="exportAccuracy" class="secondary">EXPORT ACCURACY</button>
+</div>
+
+<div class="result">
+Download your scan history and prediction validation results as CSV files.
+</div>
+</section>
+
+<section class="panel">
+<h2>INTELLIGENT MARKET SCAN</h2>
+<div id="scanresult" class="result">
+Connect to a market, collect data and run a scan.
+</div>
+</section>
+
+<section class="panel">
+<h2>SCAN HISTORY</h2>
+<div class="scroll">
+<table>
+<thead>
+<tr>
+<th>TIME</th>
+<th>MARKET</th>
+<th>DIGIT</th>
+<th>TREND</th>
+<th>RSI</th>
+<th>CANDIDATES</th>
+<th>ASSESSMENT</th>
+</tr>
+</thead>
+<tbody id="history"></tbody>
+</table>
+</div>
+
+<button id="clearhistory" style="margin-top:10px">
+CLEAR HISTORY
+</button>
+</section>
+
+<section class="panel">
+<h2>MODEL TRANSPARENCY</h2>
+<div class="result">
+• One selected market is analysed live at a time.<br>
+• Future tick analysis uses multi-step digit transitions.<br>
+• Historical frequencies are not guaranteed future outcomes.<br>
+• Accuracy is measured against actual subsequent ticks.<br>
+• Model scores are not calibrated probabilities.<br>
+• Market comparisons use separate historical samples.<br>
+• This is an analysis tool only. It does not place trades.
+</div>
+</section>
+
+</main>
+
+<button id="aiOrb" class="ai-orb">
+    ✦
+</button>
+
+<footer>
+DERIV INTELLIGENT MARKET ANALYSER V3.0 · Analysis only · Not financial advice
+</footer>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const WS_URL =
+"wss://ws.derivws.com/websockets/v3?app_id=1089";
+
+const MAX_TICKS = 1200;
+const MIN_SAMPLE = 100;
+
+const MARKETS = [
+"1HZ10V","1HZ25V","1HZ50V","1HZ75V","1HZ100V",
+"R_10","R_25","R_50","R_75","R_100"
+];
+
+let socket = null;
+let prices = [];
+let digits = [];
+let times = [];
+    let tickSequence = 0;
+let pendingContractPrediction = null;
+    let autoAIScanEnabled = false;
+let autoAIScanTimer = null;
+let pip = 2;
+let market = $("market").value;
+let manualClose = false;
+
+let history = [];
+let pendingPredictions = [];
+
+let accuracy = {
+5:{tested:0,top1:0,top3:0},
+10:{tested:0,top1:0,top3:0},
+20:{tested:0,top1:0,top3:0}
+};
+
+let alertsEnabled = false;
+let lastAlertKey = "";
+
+let comparisonBusy = false;
+let comparisonResults = [];
+
+try {
+history = JSON.parse(
+localStorage.getItem("derivV3History") || "[]"
+);
+
+if(!Array.isArray(history)) history=[];
+} catch(e) {
+history=[];
+}
+
+try {
+accuracy = JSON.parse(
+localStorage.getItem("derivV3Accuracy") ||
+JSON.stringify(accuracy)
+);
+} catch(e) {}
+
+function setStatus(message,color="#ffd166") {
+$("status").textContent = "● " + message;
+$("status").style.color = color;
+}
+
+function priceText(value) {
+return Number(value).toFixed(
+Math.max(0,Math.min(10,pip))
+);
+}
+
+function digitOf(value,precision) {
+const text = Number(value).toFixed(
+Math.max(0,Math.min(10,precision || 0))
+);
+
+return Number(text.replace(".","").slice(-1));
+}
+
+function flashDigit(digit) {
+$("bigdigit").textContent = digit;
+$("lastdigit").textContent = digit;
+
+$("updated").textContent =
+"Updated " + new Date().toLocaleTimeString();
+
+const element = $("bigdigit");
+
+element.classList.remove("pop");
+void element.offsetWidth;
+element.classList.add("pop");
+}
+
+function disconnect() {
+manualClose=true;
+
+if(socket) {
+const old=socket;
+socket=null;
+old.onclose=null;
+
+try {old.close();} catch(e){}
+}
+
+setStatus("DISCONNECTED");
+}
+
+function resetMarket() {
+prices=[];
+digits=[];
+times=[];
+pendingPredictions=[];
+tickSequence=0;
+pendingContractPrediction=null;
+lastAIScanSignature="";
+if(autoAIScanTimer!==null) {
+    clearTimeout(autoAIScanTimer);
+    autoAIScanTimer=null;
+}
+
+$("price").textContent="---";
+$("lastdigit").textContent="---";
+$("bigdigit").textContent="--";
+$("ticks").textContent="0";
+$("epoch").textContent="---";
+$("sample").textContent="WAITING";
+
+$("active").textContent=market;
+$("scanresult").textContent="Waiting for market history...";
+
+update();
+}
+
+function connect() {
+disconnect();
+
+manualClose=false;
+market=$("market").value;
+
+resetMarket();
+
+setStatus("CONNECTING...");
+
+try {
+socket=new WebSocket(WS_URL);
+} catch(e) {
+setStatus("CONNECTION FAILED","#ff5b75");
+return;
+}
+
+const currentSocket=socket;
+let historyTimeout = null;
+
+const connectionTimeout = setTimeout(() => {
+    if (socket === currentSocket && currentSocket.readyState !== WebSocket.OPEN) {
+        setStatus("CONNECTION TIMEOUT", "#ff5b75");
+        currentSocket.close();
+    }
+}, 15000);
+
+currentSocket.onopen=()=>{
+if(socket!==currentSocket)return;
+clearTimeout(connectionTimeout);
+
+setStatus("CONNECTED · REQUESTING HISTORY","#00e69a");
+historyTimeout = setTimeout(() => {
+    if (socket === currentSocket && digits.length === 0) {
+        setStatus("NO HISTORY RECEIVED · CHECK MARKET / API ACCESS", "#ff5b75");
+        $("scanresult").textContent = "The WebSocket opened, but no history data arrived. Disconnect and reconnect; if this repeats, check the browser console for the Deriv API response.";
+    }
+}, 12000);
+
+currentSocket.send(JSON.stringify({
+ticks_history:market,
+count:1000,
+end:"latest",
+style:"ticks",
+req_id:1
+}));
+};
+
+currentSocket.onmessage=event=>{
+if(socket!==currentSocket)return;
+
+console.log("DERIV MESSAGE:", event.data);
+
+let data;
+
+try {
+data=JSON.parse(event.data);
+} catch(e) {
+return;
+}
+
+if(data.error) {
+setStatus("API ERROR","#ff5b75");
+
+$("scanresult").textContent =
+data.error.message || "Market data error";
+
+return;
+}
+
+/* Handle market comparison replies */
+
+const requestId =
+data.req_id ?? data.echo_req?.req_id;
+
+if(requestId && requestId>=100 && requestId<200) {
+handleComparisonResponse(requestId,data);
+return;
+}
+
+if(data.msg_type==="history" && data.history) {
+if (historyTimeout !== null) clearTimeout(historyTimeout);
+loadHistory(data.history,data.pip_size);
+setStatus(`HISTORY LOADED · ${digits.length} TICKS`, "#00e69a");
+
+if(currentSocket.readyState===WebSocket.OPEN) {
+currentSocket.send(JSON.stringify({
+ticks:market,
+subscribe:1
+}));
+
+setStatus("LIVE STREAM ACTIVE","#00e69a");
+}
+}
+
+if(data.msg_type==="tick" && data.tick) {
+const tick=data.tick;
+
+if(tick.symbol && tick.symbol!==market)return;
+
+processTick(
+tick.quote,
+tick.pip_size,
+tick.epoch
+);
+}
+};
+
+currentSocket.onerror=()=>{
+if(socket===currentSocket) {
+if (historyTimeout !== null) clearTimeout(historyTimeout);
+setStatus("CONNECTION ERROR · CHECK NETWORK / API", "#ff5b75");
+$("scanresult").textContent = "WebSocket connection error. Check your internet connection, then reconnect.";
+}
+};
+
+currentSocket.onclose=()=>{
+clearTimeout(connectionTimeout);
+if (historyTimeout !== null) clearTimeout(historyTimeout);
+if(socket===currentSocket) {
+socket=null;
+
+if(!manualClose) {
+setStatus("CONNECTION CLOSED","#ffd166");
+}
+}
+};
+}
+
+function loadHistory(data,precision) {
+if(!Array.isArray(data.prices))return;
+
+pip=Number.isInteger(precision)?precision:2;
+
+prices=[];
+digits=[];
+times=[];
+pendingPredictions=[];
+
+const timestamps=Array.isArray(data.times)
+?data.times:[];
+
+data.prices.forEach((price,index)=>{
+const value=Number(price);
+
+if(!Number.isFinite(value))return;
+
+prices.push(value);
+digits.push(digitOf(value,pip));
+times.push(timestamps[index]??null);
+});
+
+if(prices.length>MAX_TICKS) {
+prices=prices.slice(-MAX_TICKS);
+digits=digits.slice(-MAX_TICKS);
+times=times.slice(-MAX_TICKS);
+}
+
+if(prices.length) {
+$("price").textContent=priceText(prices.at(-1));
+
+flashDigit(digits.at(-1));
+
+$("epoch").textContent=times.at(-1)??"History";
+}
+
+$("sample").textContent=
+digits.length>=MIN_SAMPLE?"READY":"COLLECTING";
+
+update();
+}
+
+function countDigits(array) {
+const counts=Array(10).fill(0);
+
+array.forEach(digit=>counts[digit]++);
+
+return counts;
+}
+
+function topDigits(array,count=3) {
+const counts=countDigits(array);
+
+return [...Array(10).keys()]
+.sort((a,b)=>counts[b]-counts[a]||a-b)
+.slice(0,count)
+.map(digit=>({
+digit,
+count:counts[digit],
+percent:array.length
+?100*counts[digit]/array.length:0
+}));
+}
+
+/* Multi-step Markov model */
+
+function buildTransitionModel(array) {
+const matrix=Array.from(
+{length:10},
+()=>Array(10).fill(0)
+);
+
+const counts=countDigits(array);
+
+for(let i=0;i<array.length-1;i++) {
+matrix[array[i]][array[i+1]]++;
+}
+
+const globalTotal=counts.reduce((a,b)=>a+b,0);
+
+const globalDistribution=counts.map(
+count=>(count+1)/(globalTotal+10)
+);
+
+const probabilities=matrix.map(row=>{
+const total=row.reduce((a,b)=>a+b,0);
+
+if(total===0) {
+return [...globalDistribution];
+}
+
+return row.map(
+count=>(count+1)/(total+10)
+);
+});
+
+return {
+matrix,
+probabilities,
+globalDistribution
+};
+}
+
+function futureForecast(array,horizon) {
+if(array.length<MIN_SAMPLE)return null;
+
+const model=buildTransitionModel(array);
+
+let state=Array(10).fill(0);
+
+state[array.at(-1)]=1;
+
+for(let step=0;step<horizon;step++) {
+const next=Array(10).fill(0);
+
+for(let from=0;from<10;from++) {
+for(let to=0;to<10;to++) {
+next[to]+=
+state[from]*model.probabilities[from][to];
+}
+}
+
+state=next;
+}
+
+const ranking=state
+.map((score,digit)=>({digit,score:score*100}))
+.sort((a,b)=>b.score-a.score);
+
+return {
+horizon,
+ranking,
+model
+};
+}
+/* ==========================================
+   PHASE 3: BLENDED DIGIT FORECAST ENGINE
+========================================== */
+
+function buildContractDistribution(array, horizon) {
+
+    const forecast = futureForecast(array, horizon);
+
+    if (
+        !forecast ||
+        !forecast.ranking ||
+        forecast.ranking.length === 0
+    ) {
+        return null;
+    }
+
+    // Markov forecast distribution
+    const markovScores = Array(10).fill(0);
+
+    forecast.ranking.forEach(item => {
+        markovScores[item.digit] = item.score;
+    });
+
+    // Recent digit distribution
+    const recent = array.slice(-200);
+
+    const counts = Array(10).fill(0);
+
+    recent.forEach(digit => {
+
+        if (digit >= 0 && digit <= 9) {
+            counts[digit]++;
+        }
+
+    });
+
+    const total = recent.length || 1;
+
+    // Blend the two models
+    const blended = Array(10).fill(0);
+
+    for (let digit = 0; digit < 10; digit++) {
+
+        const recentShare =
+            (counts[digit] / total) * 100;
+
+        blended[digit] =
+            (markovScores[digit] * 0.70) +
+            (recentShare * 0.30);
+
+    }
+
+    // Normalize the distribution
+    const blendedTotal =
+        blended.reduce((a, b) => a + b, 0);
+
+    if (blendedTotal > 0) {
+
+        for (let digit = 0; digit < 10; digit++) {
+
+            blended[digit] =
+                (blended[digit] / blendedTotal) * 100;
+
+        }
+
+    }
+
+    const ranking = blended
+        .map((score, digit) => ({
+            digit,
+            score
+        }))
+        .sort((a, b) => b.score - a.score);
+
+    return {
+
+        horizon,
+        ranking,
+        distribution: blended,
+        model: forecast.model
+
+    };
+
+}
+
+
+/* ==========================================
+   PHASE 3: RISE/FALL ANALYSIS ENGINE
+========================================== */
+
+function analyseRiseFall(horizon) {
+
+    const t = technicalAnalysis(prices);
+
+    let riseVotes = 0;
+    let fallVotes = 0;
+
+    const details = [];
+
+    // EMA direction
+    if (t.ema9 !== null && t.ema21 !== null) {
+
+        if (t.ema9 > t.ema21) {
+
+            riseVotes++;
+            details.push("EMA: bullish");
+
+        } else if (t.ema9 < t.ema21) {
+
+            fallVotes++;
+            details.push("EMA: bearish");
+
+        } else {
+
+            details.push("EMA: neutral");
+
+        }
+
+    }
+
+    // RSI direction
+    if (t.rsi !== null) {
+
+        if (t.rsi > 55) {
+
+            riseVotes++;
+            details.push("RSI: positive momentum");
+
+        } else if (t.rsi < 45) {
+
+            fallVotes++;
+            details.push("RSI: negative momentum");
+
+        } else {
+
+            details.push("RSI: neutral");
+
+        }
+
+    }
+
+    // Short-term price direction
+    if (prices.length > horizon) {
+
+        const change =
+            prices.at(-1) -
+            prices.at(-1 - horizon);
+
+        if (change > 0) {
+
+            riseVotes++;
+            details.push("Short-term movement: UP");
+
+        } else if (change < 0) {
+
+            fallVotes++;
+            details.push("Short-term movement: DOWN");
+
+        }
+
+    }
+
+    // Longer-term price direction
+    if (prices.length > 20) {
+
+        const change =
+            prices.at(-1) -
+            prices.at(-21);
+
+        if (change > 0) {
+
+            riseVotes++;
+            details.push("Long-term movement: UP");
+
+        } else if (change < 0) {
+
+            fallVotes++;
+            details.push("Long-term movement: DOWN");
+
+        }
+
+    }
+
+    const totalVotes = riseVotes + fallVotes;
+
+    const difference =
+        Math.abs(riseVotes - fallVotes);
+
+    let prediction = "WAIT";
+
+    if (riseVotes > fallVotes) {
+        prediction = "RISE";
+    }
+
+    if (fallVotes > riseVotes) {
+        prediction = "FALL";
+    }
+
+    const agreement = totalVotes > 0
+        ? (Math.max(riseVotes, fallVotes) / totalVotes) * 100
+        : 0;
+
+    const qualified =
+        totalVotes >= 3 &&
+        difference >= 2 &&
+        agreement >= 75;
+
+    return {
+
+        prediction,
+        score: agreement,
+        riseVotes,
+        fallVotes,
+        qualified,
+        details
+
+    };
+
+}
+
+
+/* ==========================================
+   PHASE 3: OVER/UNDER ANALYSIS ENGINE
+========================================== */
+
+function analyseOverUnder(distribution, barrier) {
+
+    let over = 0;
+    let under = 0;
+
+    for (let digit = 0; digit <= 9; digit++) {
+
+        if (digit > barrier) {
+            over += distribution[digit];
+        }
+
+        if (digit < barrier) {
+            under += distribution[digit];
+        }
+
+    }
+
+    const total = over + under;
+
+    const overScore =
+        total > 0 ? (over / total) * 100 : 0;
+
+    const underScore =
+        total > 0 ? (under / total) * 100 : 0;
+
+    let prediction = "WAIT";
+    let score = 0;
+
+    if (overScore > underScore) {
+
+        prediction = "OVER";
+        score = overScore;
+
+    } else if (underScore > overScore) {
+
+        prediction = "UNDER";
+        score = underScore;
+
+    }
+
+    // Barriers 0 and 9 leave only one possible side.
+    // Avoid treating such a forced outcome as an AI edge.
+    const validBarrier = barrier >= 1 && barrier <= 8;
+
+    const qualified =
+        validBarrier &&
+        score >= 70;
+
+    return {
+
+        prediction,
+        score,
+        overScore,
+        underScore,
+        barrier,
+        qualified,
+        validBarrier
+
+    };
+
+}
+
+
+/* ==========================================
+   PHASE 3: MATCHES/DIFFERS ANALYSIS ENGINE
+========================================== */
+
+function analyseMatchesDiffers(distribution, selectedDigit) {
+
+    const target = Number(selectedDigit);
+
+    const matchScore = distribution[target];
+
+    const differScore = 100 - matchScore;
+
+    let prediction = "WAIT";
+    let score = 0;
+
+    if (matchScore >= differScore) {
+
+        prediction = "MATCHES";
+        score = matchScore;
+
+    } else {
+
+        prediction = "DIFFERS";
+        score = differScore;
+
+    }
+
+    /*
+       Matches requires strong concentration
+       on the selected digit.
+
+       Differs requires an even stronger
+       model share to avoid weak signals.
+    */
+
+    const qualified =
+        prediction === "MATCHES"
+        ? matchScore >= 65
+        : differScore >= 95;
+
+    return {
+
+        prediction,
+        target,
+        matchScore,
+        differScore,
+        score,
+        qualified
+
+    };
+
+}
+function makeForecast(array) {
+if(array.length<MIN_SAMPLE)return null;
+
+const recent=array.slice(-300);
+const counts=countDigits(recent);
+
+const lastDigit=array.at(-1);
+const transitions=Array(10).fill(0);
+
+let transitionCount=0;
+
+for(let i=0;i<array.length-1;i++) {
+if(array[i]===lastDigit) {
+transitions[array[i+1]]++;
+transitionCount++;
+}
+}
+
+const scores=counts.map((count,index)=>{
+const frequency=count/recent.length;
+
+const transition=
+(transitions[index]+1)/(transitionCount+10);
+
+return .65*frequency+.35*transition;
+});
+
+const total=scores.reduce((a,b)=>a+b,0);
+
+const ranking=[...Array(10).keys()]
+.sort((a,b)=>scores[b]-scores[a])
+.map(digit=>({
+digit,
+score:100*scores[digit]/total
+}));
+
+return {transitionCount,ranking};
+}
+
+/* Technical indicators */
+
+function calculateEMA(array,period) {
+if(array.length<period)return null;
+
+const multiplier=2/(period+1);
+
+let value=
+array.slice(0,period).reduce((a,b)=>a+b,0)/period;
+
+for(let i=period;i<array.length;i++) {
+value=array[i]*multiplier+value*(1-multiplier);
+}
+
+return value;
+}
+
+function calculateRSI(array,period=14) {
+if(array.length<=period)return null;
+
+let gains=0;
+let losses=0;
+
+for(let i=array.length-period;i<array.length;i++) {
+const change=array[i]-array[i-1];
+
+if(change>0)gains+=change;
+else losses-=change;
+}
+
+if(losses===0)return gains===0?50:100;
+
+const rs=(gains/period)/(losses/period);
+
+return 100-100/(1+rs);
+}
+
+function technicalAnalysis(array=prices) {
+const ema9=calculateEMA(array,9);
+const ema21=calculateEMA(array,21);
+const rsi=calculateRSI(array);
+
+const recent=array.slice(-50);
+const changes=[];
+
+for(let i=1;i<recent.length;i++) {
+changes.push(Math.abs(recent[i]-recent[i-1]));
+}
+
+const averageMovement=changes.length
+?changes.reduce((a,b)=>a+b,0)/changes.length
+:null;
+
+let trend="WAIT";
+
+if(ema9!==null && ema21!==null) {
+const difference=ema9-ema21;
+const tolerance=Math.abs(ema21)*0.0000001;
+
+trend=
+difference>tolerance?"UPTREND":
+difference< -tolerance?"DOWNTREND":
+"SIDEWAYS";
+}
+
+const movement=array.length>=20
+?array.at(-1)-array.at(-20)
+:null;
+
+return {
+ema9,
+ema21,
+rsi,
+trend,
+momentum:movement===null
+?"WAIT"
+:movement>0?"POSITIVE"
+:movement<0?"NEGATIVE":"NEUTRAL",
+support:recent.length>=20?Math.min(...recent):null,
+resistance:recent.length>=20?Math.max(...recent):null,
+averageMovement,
+condition:averageMovement===null
+?"WAIT":averageMovement===0?"QUIET":"ACTIVE"
+};
+}
+
+/* Accuracy tracking */
+
+function saveAccuracy() {
+try {
+localStorage.setItem(
+"derivV3Accuracy",
+JSON.stringify(accuracy)
+);
+} catch(e) {}
+
+renderAccuracy();
+}
+
+function renderAccuracy() {
+$("accuracyTable").innerHTML="";
+
+[5,10,20].forEach(h=>{
+const a=accuracy[h]||{
+tested:0,top1:0,top3:0
+};
+
+const row=document.createElement("tr");
+
+const values=[
+h+" ticks",
+a.tested,
+a.top1,
+a.tested
+?(100*a.top1/a.tested).toFixed(1)+"%"
+:"---",
+a.top3,
+a.tested
+?(100*a.top3/a.tested).toFixed(1)+"%"
+:"---"
+];
+
+values.forEach(value=>{
+const cell=document.createElement("td");
+cell.textContent=value;
+row.appendChild(cell);
+});
+
+$("accuracyTable").appendChild(row);
+});
+
+const total=[5,10,20].reduce(
+(sum,h)=>sum+(accuracy[h]?.tested||0),0
+);
+
+$("accuracyNote").textContent=
+total
+?`Total completed horizon tests: ${total}. Results are based on live observations and should be interpreted over large samples.`
+:"Accuracy tracking begins as new live ticks arrive.";
+}
+
+function evaluatePendingPredictions(currentDigit) {
+const remaining=[];
+
+pendingPredictions.forEach(prediction=>{
+if(prediction.targetTick===tickSequence) {
+const a=accuracy[prediction.horizon];
+
+a.tested++;
+
+if(prediction.top1===currentDigit)a.top1++;
+
+if(prediction.top3.includes(currentDigit))a.top3++;
+
+} else if(prediction.targetTick>tickSequence) {
+remaining.push(prediction);
+}
+});
+
+pendingPredictions=remaining;
+
+saveAccuracy();
+}
+function renderContractStats() {
+    let stats = {};
+    try {
+        stats = JSON.parse(localStorage.getItem("derivContractStatsV4") || "{}");
+    } catch (error) { stats = {}; }
+    const hits = Number(stats.HIT || 0);
+    const misses = Number(stats.MISS || 0);
+    const voids = Number(stats.VOID || 0);
+    $("contractHits").textContent = hits;
+    $("contractMisses").textContent = misses;
+    $("contractVoids").textContent = voids;
+    $("contractTotal").textContent = hits + misses + voids;
+}
+
+function evaluateActiveContractPrediction(digit, price) {
+    const prediction = pendingContractPrediction;
+
+    if (!prediction || prediction.status !== "ACTIVE") return;
+
+    const remaining = prediction.expiryTick - tickSequence;
+
+    const countdown = document.getElementById("aiRemaining");
+
+    if (countdown) {
+        countdown.textContent = Math.max(remaining, 0);
+    }
+
+    if (tickSequence < prediction.expiryTick) return;
+
+    let result = "MISS";
+    let outcome = "";
+
+    if (prediction.contractType === "RISE_FALL") {
+        if (price > prediction.entryPrice) {
+            outcome = "RISE";
+        } else if (price < prediction.entryPrice) {
+            outcome = "FALL";
+        } else {
+            outcome = "NO MOVEMENT";
+        }
+
+        if (outcome === "NO MOVEMENT") {
+            result = "VOID";
+        } else {
+            result = outcome === prediction.prediction ? "HIT" : "MISS";
+        }
+    }
+
+    else if (prediction.contractType === "OVER_UNDER") {
+        outcome = digit > prediction.barrier ? "OVER" :
+                  digit < prediction.barrier ? "UNDER" : "EQUAL";
+
+        result = outcome === prediction.prediction ? "HIT" : "MISS";
+    }
+
+    else if (prediction.contractType === "MATCHES_DIFFERS") {
+        outcome = digit === prediction.targetDigit ? "MATCHES" : "DIFFERS";
+
+        result = outcome === prediction.prediction ? "HIT" : "MISS";
+    }
+    else if (prediction.contractType === "EVEN_ODD") {
+        outcome = digit % 2 === 0 ? "EVEN" : "ODD";
+        result = outcome === prediction.prediction ? "HIT" : "MISS";
+    }
+
+    prediction.status = result;
+    prediction.exitDigit = digit;
+    prediction.exitPrice = price;
+    prediction.completedAtTick = tickSequence;
+
+    const status = document.getElementById("aiExpiryStatus");
+
+    if (status) {
+        status.textContent = result;
+        status.className = "expiry-result " + result.toLowerCase();
+    }
+
+    if (countdown) {
+        countdown.textContent = "0";
+    }
+
+    const details = document.getElementById("aiExpiryDetails");
+
+    if (details) {
+        details.textContent =
+            "Expiry digit: " + digit +
+            " | Result: " + result;
+    }
+
+    // Save simulated prediction results.
+    let stats = {};
+
+    try {
+        stats = JSON.parse(
+            localStorage.getItem("derivContractStatsV4") || "{}"
+        );
+    } catch (error) {
+        stats = {};
+    }
+
+    stats[result] = (stats[result] || 0) + 1;
+
+    localStorage.setItem(
+        "derivContractStatsV4",
+        JSON.stringify(stats)
+    );
+    renderContractStats();
+
+    const scanButton = document.getElementById("scan");
+
+    if (scanButton) {
+        scanButton.disabled = false;
+    }
+    if (autoAIScanEnabled) {
+    setTimeout(() => {
+        scheduleAutoAIScan();
+    }, 1000);
+}
+}
+    /* =================================
+   CONTINUOUS AI SCANNER
+================================= */
+
+function scheduleAutoAIScan() {
+
+    if (!autoAIScanEnabled) return;
+
+    if (
+        pendingContractPrediction &&
+        pendingContractPrediction.status === "ACTIVE"
+    ) return;
+
+    if (autoAIScanTimer !== null) return;
+
+    if (digits.length < MIN_SAMPLE) return;
+
+    const scheduledTick = tickSequence;
+
+    const signature = market + "|" + scheduledTick;
+
+    if (lastAIScanSignature === signature) return;
+
+    autoAIScanTimer = setTimeout(() => {
+
+        autoAIScanTimer = null;
+
+        if (!autoAIScanEnabled) return;
+
+        if (
+            pendingContractPrediction &&
+            pendingContractPrediction.status === "ACTIVE"
+        ) return;
+
+        // If another tick arrived, schedule against the latest tick.
+        if (tickSequence !== scheduledTick) {
+            scheduleAutoAIScan();
+            return;
+        }
+
+        runAIScan(true);
+
+    }, 500);
+}
+function schedulePredictions() {
+if(digits.length<MIN_SAMPLE)return;
+
+[5,10,20].forEach(h=>{
+const forecast=futureForecast(digits,h);
+
+if(!forecast)return;
+
+pendingPredictions.push({
+horizon:h,
+targetTick:tickSequence+h,
+top1:forecast.ranking[0].digit,
+top3:forecast.ranking.slice(0,3).map(x=>x.digit)
+});
+});
+
+/* Keep pending list within a reasonable size */
+if(pendingPredictions.length>100) {
+pendingPredictions=pendingPredictions.slice(-100);
+}
+}
+
+/* Live tick processing */
+
+function processTick(quote, precision, epoch) {
+    const value = Number(quote);
+
+    if (!Number.isFinite(value)) return;
+
+    pip = Number.isInteger(precision) ? precision : pip;
+
+    const digit = digitOf(value, pip);
+
+    // Count every accepted live tick.
+    // This counter does not reset when the arrays reach MAX_TICKS.
+    tickSequence++;
+
+    prices.push(value);
+    digits.push(digit);
+    times.push(epoch ?? null);
+
+    if (prices.length > MAX_TICKS) {
+        prices.shift();
+        digits.shift();
+        times.shift();
+    }
+
+    // Keep the existing V3 prediction validation.
+    evaluatePendingPredictions(digit);
+
+    // Check whether the locked contract prediction has expired.
+    evaluateActiveContractPrediction(digit, value);
+
+    schedulePredictions();
+
+    $("price").textContent = priceText(value);
+
+    flashDigit(digit);
+
+    $("ticks").textContent = digits.length;
+
+    $("epoch").textContent = epoch
+        ? new Date(epoch * 1000).toLocaleTimeString()
+        : "Live";
+
+    $("sample").textContent =
+        digits.length >= MIN_SAMPLE ? "READY" : "COLLECTING";
+
+    update();
+    scheduleAutoAIScan();
+}
+
+/* Digit distribution */
+
+function updateDigitDistribution() {
+const counts=countDigits(digits);
+const total=digits.length;
+
+const maximum=Math.max(0,...counts);
+const minimum=total?Math.min(...counts):0;
+
+$("digitgrid").innerHTML="";
+
+counts.forEach((count,digit)=>{
+const element=document.createElement("div");
+
+element.className="digit";
+
+if(count===maximum&&count>0) {
+element.classList.add("hot");
+}
+
+if(count===minimum) {
+element.classList.add("cold");
+}
+
+const percent=total?100*count/total:0;
+
+element.innerHTML=`
+<b>${digit}</b>
+<small>${percent.toFixed(1)}% · ${count}</small>
+<div class="bar">
+<i style="width:${percent}%"></i>
+</div>
+`;
+
+$("digitgrid").appendChild(element);
+});
+
+const ranking=[...Array(10).keys()]
+.sort((a,b)=>counts[b]-counts[a]);
+
+$("hot").textContent=total
+?ranking.slice(0,3).join(", ")
+:"---";
+
+$("cold").textContent=total
+?ranking.slice(-3).reverse().join(", ")
+:"---";
+
+const gaps=Array(10).fill(total);
+
+for(let digit=0;digit<10;digit++) {
+const lastIndex=digits.lastIndexOf(digit);
+
+if(lastIndex>=0) {
+gaps[digit]=total-1-lastIndex;
+}
+}
+
+const overdue=[...Array(10).keys()]
+.sort((a,b)=>gaps[b]-gaps[a]);
+
+$("overdue").textContent=total
+?overdue.slice(0,3)
+.map(d=>`${d} (${gaps[d]} ticks)`)
+.join(" · ")
+:"---";
+}
+
+/* Future display */
+
+function updateFutureAnalysis() {
+if(digits.length<MIN_SAMPLE) {
+["future5","future10","future20"].forEach(
+id=>$(id).textContent="WAIT"
+);
+
+$("futureDetails").textContent=
+`Need ${MIN_SAMPLE} ticks. Current sample: ${digits.length}.`;
+
+return;
+}
+
+const forecasts={
+5:futureForecast(digits,5),
+10:futureForecast(digits,10),
+20:futureForecast(digits,20)
+};
+
+[5,10,20].forEach(h=>{
+const f=forecasts[h];
+
+$(h===5?"future5":h===10?"future10":"future20")
+.textContent=f.ranking[0].digit;
+
+$(h===5?"future5score":h===10?"future10score":"future20score")
+.textContent=
+f.ranking[0].score.toFixed(2)+" model score";
+});
+
+$("futureDetails").innerHTML=`
+<b>5 TICKS:</b>
+${forecasts[5].ranking.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`).join(" · ")}
+<br>
+
+<b>10 TICKS:</b>
+${forecasts[10].ranking.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`).join(" · ")}
+<br>
+
+<b>20 TICKS:</b>
+${forecasts[20].ranking.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`).join(" · ")}
+<br>
+
+<span class="muted">
+Scores represent model rankings for the specified future horizon.
+They are not calibrated probabilities.
+</span>
+`;
+}
+
+/* Alerts */
+
+function checkAlerts(forecast) {
+if(!alertsEnabled||!forecast)return;
+
+const threshold=Math.max(
+10,
+Math.min(100,Number($("alertThreshold").value)||15)
+);
+
+const best=forecast.ranking[0];
+
+if(best.score<threshold) {
+lastAlertKey="";
+return;
+}
+
+const key=market+"-"+best.digit;
+
+if(key===lastAlertKey)return;
+
+lastAlertKey=key;
+
+const message=
+`${market}: Digit ${best.digit} has a model score of ${best.score.toFixed(1)}%.`;
+
+$("alertStatus").textContent=
+"⚡ ALERT: "+message;
+
+if("Notification" in window &&
+Notification.permission==="granted") {
+new Notification("Deriv Analyser V3",{
+body:message
+});
+}
+}
+
+/* Main dashboard update */
+
+function update() {
+const total=digits.length;
+
+const even=digits.filter(d=>d%2===0).length;
+const odd=total-even;
+
+$("ticks").textContent=total;
+$("active").textContent=market;
+
+$("evencount").textContent=even;
+$("oddcount").textContent=odd;
+
+$("evenpct").textContent=
+(total?100*even/total:0).toFixed(1)+"%";
+
+$("oddpct").textContent=
+(total?100*odd/total:0).toFixed(1)+"%";
+
+updateDigitDistribution();
+
+const t=technicalAnalysis();
+
+$("trend").textContent=t.trend;
+
+$("trend").className=
+t.trend==="UPTREND"?"green":
+t.trend==="DOWNTREND"?"red":"gold";
+
+$("ema9").textContent=
+t.ema9===null?"---":priceText(t.ema9);
+
+$("ema21").textContent=
+t.ema21===null?"---":priceText(t.ema21);
+
+$("rsi").textContent=
+t.rsi===null?"---":t.rsi.toFixed(2);
+
+$("momentum").textContent=t.momentum;
+
+$("support").textContent=
+t.support===null?"---":priceText(t.support);
+
+$("resistance").textContent=
+t.resistance===null?"---":priceText(t.resistance);
+
+$("movement").textContent=
+t.averageMovement===null
+?"---":t.averageMovement.toFixed(5);
+
+$("condition").textContent=t.condition;
+
+const shortWindow=digits.slice(-100);
+const mediumWindow=digits.slice(-300);
+
+$("top100").textContent=shortWindow.length
+?topDigits(shortWindow)
+.map(x=>`${x.digit} ${x.percent.toFixed(0)}%`)
+.join(" · ")
+:"---";
+
+$("top300").textContent=mediumWindow.length
+?topDigits(mediumWindow)
+.map(x=>`${x.digit} ${x.percent.toFixed(0)}%`)
+.join(" · ")
+:"---";
+
+const forecast=makeForecast(digits);
+
+if(!forecast) {
+$("transitions").textContent=
+`Need ${MIN_SAMPLE} ticks. Current sample: ${total}.`;
+
+$("candidate").textContent=
+`Collecting data: ${total}/${MIN_SAMPLE} ticks.`;
+
+updateFutureAnalysis();
+return;
+}
+
+$("transitions").innerHTML=`
+Latest digit: <b>${digits.at(-1)}</b><br>
+Observed transitions from this digit:
+<b>${forecast.transitionCount}</b><br>
+Top model scores:
+<b>
+${forecast.ranking.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`)
+.join(" · ")}
+</b><br>
+<span class="muted">
+65% rolling frequency + 35% smoothed transition distribution.
+</span>
+`;
+
+$("candidate").innerHTML=`
+<b>TOP 5 RANKED DIGITS</b><br>
+${forecast.ranking.slice(0,5)
+.map((x,i)=>
+`${i+1}. Digit ${x.digit} — ${x.score.toFixed(2)}% model score`
+)
+.join("<br>")}
+`;
+
+updateFutureAnalysis();
+
+checkAlerts(forecast);
+}
+
+/* Market comparison */
+
+let comparisonRequests={};
+
+function compareMarkets() {
+if(!socket||socket.readyState!==WebSocket.OPEN) {
+$("compareStatus").textContent=
+"Connect to a market first before running comparison.";
+return;
+}
+
+if(comparisonBusy)return;
+
+comparisonBusy=true;
+comparisonResults=[];
+comparisonRequests={};
+
+$("comparisonTable").innerHTML="";
+$("compare").disabled=true;
+
+$("compareStatus").textContent=
+"Requesting historical data from the ten markets...";
+
+const others=MARKETS.filter(symbol=>symbol!==market);
+
+others.forEach((symbol,index)=>{
+const reqId=100+index;
+
+comparisonRequests[reqId]=symbol;
+
+setTimeout(()=>{
+if(socket&&socket.readyState===WebSocket.OPEN) {
+socket.send(JSON.stringify({
+ticks_history:symbol,
+count:200,
+end:"latest",
+style:"ticks",
+req_id:reqId
+}));
+}
+},index*300);
+});
+
+setTimeout(()=>{
+if(comparisonBusy) {
+comparisonBusy=false;
+$("compare").disabled=false;
+
+$("compareStatus").textContent=
+`Comparison finished with ${comparisonResults.length} market results. Some markets may not have returned data.`;
+}
+},20000);
+}
+
+function handleComparisonResponse(reqId,data) {
+const symbol=comparisonRequests[reqId];
+
+if(!symbol)return;
+
+delete comparisonRequests[reqId];
+
+if(data.error||!data.history||!Array.isArray(data.history.prices)) {
+finishComparisonCheck();
+return;
+}
+
+const precision=Number.isInteger(data.pip_size)
+?data.pip_size:2;
+
+const p=data.history.prices.map(Number)
+.filter(Number.isFinite);
+
+const d=p.map(value=>digitOf(value,precision));
+
+if(!d.length) {
+finishComparisonCheck();
+return;
+}
+
+const ranking=topDigits(d,1)[0];
+
+const t=technicalAnalysis(p);
+
+comparisonResults.push({
+market:symbol,
+topDigit:ranking.digit,
+frequency:ranking.percent,
+rsi:t.rsi,
+trend:t.trend
+});
+
+renderComparison();
+
+finishComparisonCheck();
+}
+
+function finishComparisonCheck() {
+if(Object.keys(comparisonRequests).length===0) {
+comparisonBusy=false;
+$("compare").disabled=false;
+
+$("compareStatus").textContent=
+`Comparison complete. ${comparisonResults.length} markets returned usable data.`;
+}
+}
+
+function renderComparison() {
+$("comparisonTable").innerHTML="";
+
+const all=[{
+market,
+topDigit:digits.length?topDigits(digits,1)[0].digit:"---",
+frequency:digits.length?topDigits(digits,1)[0].percent:0,
+rsi:technicalAnalysis().rsi,
+trend:technicalAnalysis().trend
+},...comparisonResults];
+
+all.forEach(item=>{
+const row=document.createElement("tr");
+
+[
+item.market,
+item.topDigit,
+Number(item.frequency).toFixed(1)+"%",
+item.rsi===null||item.rsi===undefined
+?"---":Number(item.rsi).toFixed(1),
+item.trend
+].forEach(value=>{
+const cell=document.createElement("td");
+cell.textContent=value;
+row.appendChild(cell);
+});
+
+$("comparisonTable").appendChild(row);
+});
+}
+/* ==========================================
+   EVEN / ODD ANALYSIS ENGINE
+   Uses the model distribution plus recent parity balance.
+========================================== */
+function analyseEvenOdd(distribution) {
+    const evenDigits = [0, 2, 4, 6, 8];
+    const oddDigits = [1, 3, 5, 7, 9];
+    const evenScore = evenDigits.reduce((sum, d) => sum + Number(distribution[d] || 0), 0);
+    const oddScore = oddDigits.reduce((sum, d) => sum + Number(distribution[d] || 0), 0);
+    const recent = digits.slice(-30);
+    const recentEven = recent.filter(d => d % 2 === 0).length;
+    const recentOdd = recent.length - recentEven;
+    const recentEvenPct = recent.length ? 100 * recentEven / recent.length : 50;
+    const recentOddPct = recent.length ? 100 * recentOdd / recent.length : 50;
+    const prediction = evenScore > oddScore ? "EVEN" : oddScore > evenScore ? "ODD" : "WAIT";
+    const score = Math.max(evenScore, oddScore);
+    const margin = Math.abs(evenScore - oddScore);
+    // Require both a strong model share and a meaningful separation.
+    const qualified = recent.length >= 20 && prediction !== "WAIT" && score >= 70 && margin >= 15;
+    return { prediction, score, evenScore, oddScore, recentEvenPct, recentOddPct, margin, qualified, sample: recent.length };
+}
+
+/* =================================
+   V4 AI SCANNER ENGINE
+================================= */
+
+let selectedContract = "RISE_FALL";
+let lastAIScanSignature = "";
+
+/* ==========================================
+   PHASE 2: UPGRADED AI SCANNER
+========================================== */
+        /* ==========================================
+   PHASE 3: INTELLIGENT AI SCANNER
+========================================== */
+function runAIScan(automatic = false) {
+
+    autoAIScanEnabled = true;
+
+
+    // PREVENT A NEW SCAN WHILE A PREDICTION IS ACTIVE
+
+    if (
+        pendingContractPrediction &&
+        pendingContractPrediction.status === "ACTIVE"
+    ) {
+        $("aiResult").innerHTML = `
+            <h2 class="gold">PREDICTION ACTIVE</h2>
+
+            Your current prediction is locked.
+
+            Remaining ticks:
+            ${Math.max(
+                pendingContractPrediction.expiryTick - tickSequence,
+                0
+            )}
+        `;
+
+        return;
+    }
+
+
+    if (digits.length < MIN_SAMPLE) {
+
+        $("aiResult").innerHTML = `
+            <h2 class="gold">MORE DATA NEEDED</h2>
+            Collect at least ${MIN_SAMPLE} ticks first.
+        `;
+
+        return;
+    }
+
+const signature = market + "|" + tickSequence;
+    
+    if (signature === lastAIScanSignature) {
+
+        $("aiResult").innerHTML = `
+            <h2 class="gold">WAIT FOR NEW DATA</h2>
+            Wait for another market tick before scanning.
+        `;
+
+        return;
+    }
+
+
+    const horizon = Number($("aiHorizon").value);
+
+    const expiry = Number($("aiExpiry").value);
+
+    const forecast =
+        buildContractDistribution(digits, horizon);
+
+    if (!forecast) {
+
+        $("aiResult").innerHTML = `
+            <h2 class="gold">FORECAST UNAVAILABLE</h2>
+            Collect more market information.
+        `;
+
+        return;
+    }
+
+
+    let prediction = "WAIT";
+    let score = 0;
+    let qualified = false;
+    let explanation = "";
+
+    let displayDigit =
+        forecast.ranking[0].digit;
+
+    const distribution =
+        forecast.distribution;
+
+
+    /* =================================
+       RISE / FALL
+    ================================= */
+
+    if (selectedContract === "RISE_FALL") {
+
+        const result =
+            analyseRiseFall(horizon);
+
+        prediction = result.prediction;
+        score = result.score;
+        qualified = result.qualified;
+
+        explanation = `
+            Rise votes: ${result.riseVotes}/4.<br>
+
+            Fall votes: ${result.fallVotes}/4.<br><br>
+
+            ${result.details.join("<br>")}
+        `;
+
+    }
+
+
+    /* =================================
+       OVER / UNDER
+    ================================= */
+
+    else if (selectedContract === "OVER_UNDER") {
+
+        const barrier =
+            Number($("barrierDigit").value);
+
+        const result =
+            analyseOverUnder(distribution, barrier);
+
+        prediction = result.prediction;
+        score = result.score;
+        qualified = result.qualified;
+
+        explanation = `
+            Barrier: ${barrier}.<br><br>
+
+            Over model share:
+            ${result.overScore.toFixed(2)}%.<br>
+
+            Under model share:
+            ${result.underScore.toFixed(2)}%.<br><br>
+
+            Equality with the barrier is excluded.
+
+            ${result.validBarrier
+                ? ""
+                : "<br>Boundary barrier: no qualified signal."}
+        `;
+
+    }
+
+
+    /* =================================
+       MATCHES / DIFFERS
+    ================================= */
+
+    else if (selectedContract === "MATCHES_DIFFERS") {
+
+        const selectedDigit =
+            $("targetDigit").value;
+
+        const target =
+            selectedDigit === "AUTO"
+                ? forecast.ranking[0].digit
+                : Number(selectedDigit);
+
+        displayDigit = target;
+
+        const result =
+            analyseMatchesDiffers(distribution, target);
+
+        prediction =
+            result.prediction + " · DIGIT " + target;
+
+        score = result.score;
+        qualified = result.qualified;
+
+        explanation = `
+            Target digit: ${target}.<br><br>
+
+            Matches model share:
+            ${result.matchScore.toFixed(2)}%.<br>
+
+            Differs model share:
+            ${result.differScore.toFixed(2)}%.<br><br>
+
+            Automatic selection:
+            ${selectedDigit === "AUTO" ? "YES" : "NO"}.
+        `;
+
+    }
+
+
+    /* =================================
+       EVEN / ODD
+    ================================= */
+
+    else if (selectedContract === "EVEN_ODD") {
+        const result = analyseEvenOdd(distribution);
+        prediction = result.prediction;
+        score = result.score;
+        qualified = result.qualified;
+        explanation = `
+            Even model share: ${result.evenScore.toFixed(2)}%.<br>
+            Odd model share: ${result.oddScore.toFixed(2)}%.<br>
+            Model separation: ${result.margin.toFixed(2)} points.<br><br>
+            Recent 30-tick parity balance (or available sample):<br>
+            Even ${result.recentEvenPct.toFixed(1)}% · Odd ${result.recentOddPct.toFixed(1)}%.<br>
+            Recent sample: ${result.sample} ticks.<br><br>
+            A signal is withheld unless model share is at least 70% and separation is at least 15 points.
+        `;
+    }
+
+    /* =================================
+       AGREEMENT GRADE
+    ================================= */
+
+    const grade =
+        score >= 85 ? "HIGH AGREEMENT" :
+        score >= 75 ? "GOOD AGREEMENT" :
+        score >= 65 ? "MODERATE AGREEMENT" :
+        "LOW AGREEMENT";
+
+
+    /* =================================
+       LOCK QUALIFIED PREDICTION
+    ================================= */
+
+    let lockMessage = "NO ACTIVE PREDICTION";
+
+    if (qualified) {
+
+        let cleanPrediction = prediction;
+        let targetDigit = null;
+        let barrierDigit = null;
+
+        if (selectedContract === "RISE_FALL") {
+
+            cleanPrediction = prediction;
+
+        }
+
+        else if (selectedContract === "OVER_UNDER") {
+
+            cleanPrediction = prediction;
+
+            barrierDigit =
+                Number($("barrierDigit").value);
+
+        }
+
+        else if (selectedContract === "MATCHES_DIFFERS") {
+
+            cleanPrediction =
+                prediction.split(" · ")[0];
+
+            targetDigit = displayDigit;
+
+        }
+        else if (selectedContract === "EVEN_ODD") {
+            cleanPrediction = prediction;
+        }
+
+
+        pendingContractPrediction = {
+
+            market: market,
+
+            contractType: selectedContract,
+
+            prediction: cleanPrediction,
+
+            targetDigit: targetDigit,
+
+            barrier: barrierDigit,
+
+            entryDigit: digits.at(-1),
+
+            entryPrice: prices.at(-1),
+
+            startTick: tickSequence,
+
+            expiryTicks: expiry,
+
+            expiryTick: tickSequence + expiry,
+
+            score: score,
+
+            grade: grade,
+
+            status: "ACTIVE"
+
+        };
+
+        lockMessage = `
+            <div class="expiry-panel">
+
+                <h3 class="green">
+                    PREDICTION LOCKED
+                </h3>
+
+                <div>
+                    EXPIRY:
+                    <strong>${expiry} TICKS</strong>
+                </div>
+
+                <div>
+                    REMAINING:
+                    <strong id="aiRemaining">${expiry}</strong>
+                </div>
+
+                <div>
+                    STATUS:
+                    <strong id="aiExpiryStatus">
+                        ACTIVE
+                    </strong>
+                </div>
+
+                <div id="aiExpiryDetails">
+                    Waiting for expiry...
+                </div>
+
+            </div>
+        `;
+
+    }
+
+
+    /* =================================
+       AI RESULT DISPLAY
+    ================================= */
+
+    $("aiResult").innerHTML = `
+
+        <div class="muted ai-market-label">
+            DERIV AI ANALYSER · ${market}
+        </div>
+
+        <div class="prediction-display">
+
+            <div class="prediction-caption">
+                AI PREDICTED DIGIT
+            </div>
+
+            <div class="predicted-digit">
+                ${displayDigit}
+            </div>
+
+            <div class="prediction-caption">
+                TOP DIGIT FORECAST
+            </div>
+
+        </div>
+
+
+        <div class="prediction-contract">
+
+            <div class="prediction-caption">
+                CONTRACT PREDICTION
+            </div>
+
+            <h2 class="${qualified ? "green" : "gold"}">
+
+                ${qualified
+                    ? prediction
+                    : "NO QUALIFIED SIGNAL"}
+
+            </h2>
+
+        </div>
+
+
+        <div class="cards">
+
+            <div class="metric">
+                <small>MODEL AGREEMENT</small>
+                <strong>${score.toFixed(1)}%</strong>
+            </div>
+
+            <div class="metric">
+                <small>AGREEMENT GRADE</small>
+                <strong>${grade}</strong>
+            </div>
+
+            <div class="metric">
+                <small>FORECAST</small>
+                <strong>${horizon} TICKS</strong>
+            </div>
+
+            <div class="metric">
+                <small>MARKET</small>
+                <strong>${market}</strong>
+            </div>
+
+        </div>
+
+
+        ${lockMessage}
+
+
+        <div class="result">
+
+            <b>AI MODEL ANALYSIS</b><br><br>
+
+            ${explanation}
+
+        </div>
+
+
+        <div class="result">
+
+            <b>TOP FIVE DIGIT FORECASTS</b><br><br>
+
+            ${forecast.ranking.slice(0, 5).map(item => `
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    padding:6px 0;
+                    border-bottom:1px solid #30435e;
+                ">
+
+                    <span>DIGIT ${item.digit}</span>
+
+                    <strong>
+                        ${item.score.toFixed(2)}%
+                    </strong>
+
+                </div>
+
+            `).join("")}
+
+        </div>
+
+
+        <div class="muted prediction-warning">
+
+            Model agreement represents the model's
+            internal score, not a verified probability
+            of winning. Predictions are experimental
+            and require independent validation.
+
+            These are simulated predictions, not actual
+            Deriv contracts or trades.
+
+        </div>
+
+    `;
+
+
+    /* =================================
+       UPDATE EXISTING DASHBOARD METRICS
+    ================================= */
+
+    $("confidenceGrade").textContent = grade;
+
+    $("confidenceScore").textContent =
+        score.toFixed(1) + "%";
+
+    $("scanresult").textContent =
+        prediction + " · " + score.toFixed(1) + "%";
+
+
+    lastAIScanSignature = signature;
+
+}
+            
+
+
+/* Scan */
+
+function runScan() {
+if(digits.length<MIN_SAMPLE) {
+$("scanresult").innerHTML=`
+<b class="gold">MORE DATA NEEDED</b><br>
+${digits.length}/${MIN_SAMPLE} ticks collected.
+`;
+return;
+}
+
+const t=technicalAnalysis();
+const f=makeForecast(digits);
+
+const future5=futureForecast(digits,5);
+const future10=futureForecast(digits,10);
+const future20=futureForecast(digits,20);
+
+const trendAgreement=
+(t.trend==="UPTREND"&&t.rsi!==null&&t.rsi>=50)||
+(t.trend==="DOWNTREND"&&t.rsi!==null&&t.rsi<=50)
+?1:0;
+
+const transitionSupport=
+f.transitionCount>=20?1:0;
+
+const agreement=trendAgreement+transitionSupport;
+
+const assessment=
+digits.length>=500&&agreement>=2
+?"MODERATE DATA SUPPORT":
+digits.length>=200&&agreement>=1
+?"LIMITED DATA SUPPORT":
+"LOW / MIXED SUPPORT";
+
+const candidates=f.ranking.slice(0,3)
+.map(x=>`${x.digit} (${x.score.toFixed(1)}%)`)
+.join(", ");
+
+const record={
+time:new Date().toLocaleString(),
+market,
+digit:digits.at(-1),
+trend:t.trend,
+rsi:t.rsi,
+candidates,
+assessment,
+future5:future5.ranking[0].digit,
+future10:future10.ranking[0].digit,
+future20:future20.ranking[0].digit
+};
+
+$("scanresult").innerHTML=`
+<b class="cyan">V3 MARKET SCAN · ${market}</b><br>
+Time: ${record.time}<br>
+Ticks analysed: ${digits.length}<br>
+Latest price: ${priceText(prices.at(-1))}<br>
+Latest digit: <b>${record.digit}</b><br><br>
+
+<b>TECHNICAL ANALYSIS</b><br>
+Trend: ${t.trend}<br>
+EMA 9: ${t.ema9===null?"N/A":priceText(t.ema9)}<br>
+EMA 21: ${t.ema21===null?"N/A":priceText(t.ema21)}<br>
+RSI 14: ${t.rsi===null?"N/A":t.rsi.toFixed(2)}<br>
+Momentum: ${t.momentum}<br>
+Support: ${t.support===null?"N/A":priceText(t.support)}<br>
+Resistance: ${t.resistance===null?"N/A":priceText(t.resistance)}<br><br>
+
+<b>FUTURE TICK MODEL</b><br>
+5 ticks: ${record.future5}<br>
+10 ticks: ${record.future10}<br>
+20 ticks: ${record.future20}<br><br>
+
+<b>DIGIT MODEL</b><br>
+Top candidates: ${candidates}<br>
+Model alignment indicators: ${agreement}/2<br><br>
+
+<b>ASSESSMENT: ${assessment}</b><br>
+
+<span class="muted">
+The assessment describes sample depth and limited indicator agreement.
+It is not a win probability or trading recommendation.
+</span>
+`;
+
+history.unshift(record);
+history=history.slice(0,100);
+
+try {
+localStorage.setItem(
+"derivV3History",
+JSON.stringify(history)
+);
+} catch(e) {}
+
+renderHistory();
+}
+
+/* History */
+
+function renderHistory() {
+$("history").innerHTML="";
+
+history.slice(0,100).forEach(record=>{
+const row=document.createElement("tr");
+
+[
+record.time,
+record.market,
+record.digit,
+record.trend,
+record.rsi==null?"---":Number(record.rsi).toFixed(1),
+record.candidates,
+record.assessment
+].forEach(value=>{
+const cell=document.createElement("td");
+cell.textContent=value??"---";
+row.appendChild(cell);
+});
+
+$("history").appendChild(row);
+});
+
+/* Export scan history */
+
+}
+
+function downloadCSV(filename,rows) {
+if(!rows.length) {
+alert("There is no data to export yet.");
+return;
+}
+
+const csv=rows.map(row=>
+row.map(value=>
+'"'+String(value??"").replace(/"/g,'""')+'"'
+).join(",")
+).join("\n");
+
+const blob=new Blob([csv],{
+type:"text/csv;charset=utf-8;"
+});
+
+const url=URL.createObjectURL(blob);
+
+const link=document.createElement("a");
+link.href=url;
+link.download=filename;
+
+document.body.appendChild(link);
+link.click();
+link.remove();
+
+URL.revokeObjectURL(url);
+}
+
+function exportScans() {
+const rows=[[
+"Time","Market","Digit","Trend","RSI",
+"Candidates","Assessment",
+"5 Tick Candidate","10 Tick Candidate","20 Tick Candidate"
+]];
+
+history.forEach(r=>{
+rows.push([
+r.time,r.market,r.digit,r.trend,r.rsi,
+r.candidates,r.assessment,
+r.future5,r.future10,r.future20
+]);
+});
+
+downloadCSV("deriv-v3-scan-history.csv",rows);
+}
+
+function exportAccuracy() {
+const rows=[[
+"Horizon","Tests","Top 1 Hits","Top 1 Accuracy",
+"Top 3 Hits","Top 3 Accuracy"
+]];
+
+[5,10,20].forEach(h=>{
+const a=accuracy[h];
+
+rows.push([
+h,
+a.tested,
+a.top1,
+a.tested?100*a.top1/a.tested:0,
+a.top3,
+a.tested?100*a.top3/a.tested:0
+]);
+});
+
+downloadCSV("deriv-v3-prediction-accuracy.csv",rows);
+}
+
+/* Button actions */
+
+$("connect").addEventListener("click",connect);
+
+$("disconnect").addEventListener("click",disconnect);
+
+$("market").addEventListener("change",connect);
+
+/* V4 CONTRACT SELECTION */
+
+document.querySelectorAll(".contract-choice").forEach(button => {
+
+    button.addEventListener("click",() => {
+
+        selectedContract = button.dataset.contract;
+
+        document.querySelectorAll(".contract-choice")
+        .forEach(item => item.classList.remove("active"));
+
+        button.classList.add("active");
+
+        $("barrierControl").style.display =
+            selectedContract === "OVER_UNDER"
+            ? "block" : "none";
+
+        $("digitControl").style.display =
+            selectedContract === "MATCHES_DIFFERS"
+            ? "block" : "none";
+
+        $("aiResult").innerHTML =
+            "Contract selected. Press AI SCAN to analyse.";
+
+        lastAIScanSignature = "";
+    });
+
+});
+
+
+/* V4 FLOATING AI SCANNER */
+
+$("aiOrb").addEventListener("click",() => {
+    $("aiPopup").classList.toggle("open");
+});
+
+$("closeAIPopup").addEventListener("click",() => {
+    $("aiPopup").classList.remove("open");
+});
+
+/* AI SCAN BUTTON */
+
+$("scan").addEventListener("click",runAIScan);
+
+$("compare").addEventListener("click",compareMarkets);
+
+$("clearhistory").addEventListener("click",()=>{
+    if(confirm("Clear saved scan history?")) {
+        history=[];
+        localStorage.removeItem("derivV3History");
+        renderHistory();
+    }
+});
+
+$("resetAccuracy").addEventListener("click",()=>{
+    if(confirm("Reset all prediction accuracy records?")) {
+        accuracy={
+            5:{tested:0,top1:0,top3:0},
+            10:{tested:0,top1:0,top3:0},
+            20:{tested:0,top1:0,top3:0}
+        };
+
+        pendingPredictions=[];
+
+        saveAccuracy();
+    }
+});
+
+$("alertToggle").addEventListener("click",()=>{
+    alertsEnabled=!alertsEnabled;
+
+    $("alertToggle").textContent=
+        alertsEnabled?"DISABLE ALERTS":"ENABLE ALERTS";
+
+    $("alertStatus").textContent=
+        alertsEnabled
+        ?"Smart alerts are active."
+        :"Smart alerts are disabled.";
+
+    if(!alertsEnabled)lastAlertKey="";
+});
+
+$("notificationPermission").addEventListener("click",async()=>{
+    if(!("Notification" in window)) {
+        alert("Browser notifications are not supported.");
+        return;
+    }
+
+    const permission=await Notification.requestPermission();
+
+    $("alertStatus").textContent=
+        permission==="granted"
+        ?"Browser notifications enabled."
+        :"Browser notifications were not enabled.";
+});
+
+$("exportScans").addEventListener("click",exportScans);
+
+$("exportAccuracy").addEventListener("click",exportAccuracy);
+/* Initial setup */
+
+renderHistory();
+renderAccuracy();
+renderContractStats();
+update();
+/* =================================
+   PHASE 1: LIVE DIGIT ANIMATION
+================================= */
+
+(function setupLiveDigitAnimation() {
+
+    const liveDigit = document.getElementById("bigdigit");
+
+    if (!liveDigit) {
+        console.warn("Live digit display not found.");
+        return;
+    }
+
+    let previousDigit = liveDigit.textContent.trim();
+
+    const observer = new MutationObserver(() => {
+
+        const currentDigit = liveDigit.textContent.trim();
+
+        if (
+            currentDigit !== previousDigit &&
+            /^[0-9]$/.test(currentDigit)
+        ) {
+
+            previousDigit = currentDigit;
+
+            liveDigit.classList.remove("digit-pop");
+
+            // Restart the animation
+            void liveDigit.offsetWidth;
+
+            liveDigit.classList.add("digit-pop");
+        }
+    });
+
+    observer.observe(liveDigit, {
+        childList: true,
+        characterData: true,
+        subtree: true
+    });
+
+})();
+</script>
+
+</body>
+</html>
 
