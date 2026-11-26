@@ -2112,15 +2112,10 @@ function evaluateActiveContractPrediction(digit, price) {
     /* =================================
    CONTINUOUS AI SCANNER
 ================================= */
-
+    
 function scheduleAutoAIScan() {
 
     if (!autoAIScanEnabled) return;
-
-    if (
-        pendingContractPrediction &&
-        pendingContractPrediction.status === "ACTIVE"
-    ) return;
 
     if (autoAIScanTimer !== null) return;
 
@@ -2138,17 +2133,13 @@ function scheduleAutoAIScan() {
 
         if (!autoAIScanEnabled) return;
 
-        if (
-            pendingContractPrediction &&
-            pendingContractPrediction.status === "ACTIVE"
-        ) return;
-
-        // If another tick arrived, schedule against the latest tick.
+        // Reschedule if newer market data arrived.
         if (tickSequence !== scheduledTick) {
             scheduleAutoAIScan();
             return;
         }
 
+        // Refresh the live forecast even when a prediction is active.
         runAIScan(true);
 
     }, 500);
@@ -2669,29 +2660,6 @@ function runAIScan(automatic = false) {
 
     autoAIScanEnabled = true;
 
-
-    // PREVENT A NEW SCAN WHILE A PREDICTION IS ACTIVE
-
-    if (
-        pendingContractPrediction &&
-        pendingContractPrediction.status === "ACTIVE"
-    ) {
-        $("aiResult").innerHTML = `
-            <h2 class="gold">PREDICTION ACTIVE</h2>
-
-            Your current prediction is locked.
-
-            Remaining ticks:
-            ${Math.max(
-                pendingContractPrediction.expiryTick - tickSequence,
-                0
-            )}
-        `;
-
-        return;
-    }
-
-
     if (digits.length < MIN_SAMPLE) {
 
         $("aiResult").innerHTML = `
@@ -2879,106 +2847,51 @@ const signature = market + "|" + tickSequence;
     /* =================================
        LOCK QUALIFIED PREDICTION
     ================================= */
+let lockMessage = "NO ACTIVE PREDICTION";
 
-    let lockMessage = "NO ACTIVE PREDICTION";
+if (
+    pendingContractPrediction &&
+    pendingContractPrediction.status === "ACTIVE"
+) {
+    lockMessage = `
+        <div class="expiry-panel">
+            <h3 class="green">PREDICTION ACTIVE</h3>
 
-    if (qualified) {
-
-        let cleanPrediction = prediction;
-        let targetDigit = null;
-        let barrierDigit = null;
-
-        if (selectedContract === "RISE_FALL") {
-
-            cleanPrediction = prediction;
-
-        }
-
-        else if (selectedContract === "OVER_UNDER") {
-
-            cleanPrediction = prediction;
-
-            barrierDigit =
-                Number($("barrierDigit").value);
-
-        }
-
-        else if (selectedContract === "MATCHES_DIFFERS") {
-
-            cleanPrediction =
-                prediction.split(" · ")[0];
-
-            targetDigit = displayDigit;
-
-        }
-        else if (selectedContract === "EVEN_ODD") {
-            cleanPrediction = prediction;
-        }
-
-
-        pendingContractPrediction = {
-
-            market: market,
-
-            contractType: selectedContract,
-
-            prediction: cleanPrediction,
-
-            targetDigit: targetDigit,
-
-            barrier: barrierDigit,
-
-            entryDigit: digits.at(-1),
-
-            entryPrice: prices.at(-1),
-
-            startTick: tickSequence,
-
-            expiryTicks: expiry,
-
-            expiryTick: tickSequence + expiry,
-
-            score: score,
-
-            grade: grade,
-
-            status: "ACTIVE"
-
-        };
-
-        lockMessage = `
-            <div class="expiry-panel">
-
-                <h3 class="green">
-                    PREDICTION LOCKED
-                </h3>
-
-                <div>
-                    EXPIRY:
-                    <strong>${expiry} TICKS</strong>
-                </div>
-
-                <div>
-                    REMAINING:
-                    <strong id="aiRemaining">${expiry}</strong>
-                </div>
-
-                <div>
-                    STATUS:
-                    <strong id="aiExpiryStatus">
-                        ACTIVE
-                    </strong>
-                </div>
-
-                <div id="aiExpiryDetails">
-                    Waiting for expiry...
-                </div>
-
+            <div>
+                EXPIRY:
+                <strong>${pendingContractPrediction.expiryTicks} TICKS</strong>
             </div>
-        `;
 
-    }
+            <div>
+                REMAINING:
+                <strong id="aiRemaining">
+                    ${Math.max(
+                        pendingContractPrediction.expiryTick - tickSequence,
+                        0
+                    )}
+                </strong>
+            </div>
 
+            <div>
+                STATUS:
+                <strong id="aiExpiryStatus">ACTIVE</strong>
+            </div>
+
+            <div id="aiExpiryDetails">
+                Waiting for expiry...
+            </div>
+        </div>
+    `;
+}
+    
+if (
+    qualified &&
+    (
+        !pendingContractPrediction ||
+        pendingContractPrediction.status !== "ACTIVE"
+    )
+) {
+    let cleanPrediction = prediction;
 
     /* =================================
        AI RESULT DISPLAY
@@ -3006,7 +2919,7 @@ const signature = market + "|" + tickSequence;
 
         </div>
 
-
+${lockMessage}
         <div class="prediction-contract">
 
             <div class="prediction-caption">
@@ -3023,7 +2936,7 @@ const signature = market + "|" + tickSequence;
 
         </div>
 
-
+${lockMessage}
         <div class="cards">
 
             <div class="metric">
