@@ -1283,18 +1283,21 @@ $("scanresult").textContent = "WebSocket connection error. Check your internet c
 }
 };
 
-currentSocket.onclose=()=>{
-clearTimeout(connectionTimeout);
-if (historyTimeout !== null) clearTimeout(historyTimeout);
+currentSocket.onclose=(event)=>{
 if(socket===currentSocket) {
 socket=null;
 
-if(!manualClose) {
-setStatus("CONNECTION CLOSED","#ffd166");
-}
+setStatus(
+"CONNECTION CLOSED · CODE "+event.code,
+"#ff5b75"
+);
+
+$("scanresult").textContent =
+"Close code: "+event.code+
+"\nReason: "+(event.reason || "No reason supplied")+
+"\nClean close: "+event.wasClean;
 }
 };
-}
 
 function loadHistory(data,precision) {
 if(!Array.isArray(data.prices))return;
