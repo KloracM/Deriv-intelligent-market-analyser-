@@ -1283,20 +1283,20 @@ $("scanresult").textContent = "WebSocket connection error. Check your internet c
 }
 };
 
-currentSocket.onclose=(event)=>{
-if(socket===currentSocket) {
-socket=null;
+currentSocket.onclose = (event) => {
+    if (socket === currentSocket) {
+        socket = null;
 
-setStatus(
-"CONNECTION CLOSED · CODE "+event.code,
-"#ff5b75"
-);
+        setStatus(
+            "CONNECTION CLOSED · CODE " + event.code,
+            "#ff5b75"
+        );
 
-$("scanresult").textContent =
-"Close code: "+event.code+
-"\nReason: "+(event.reason || "No reason supplied")+
-"\nClean close: "+event.wasClean;
-}
+        $("scanresult").textContent =
+            "Close code: " + event.code +
+            "\nReason: " + (event.reason || "No reason supplied") +
+            "\nClean close: " + event.wasClean;
+    }
 };
 
 function loadHistory(data,precision) {
