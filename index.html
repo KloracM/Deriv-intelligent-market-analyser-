@@ -1281,12 +1281,19 @@ tick.epoch
 }
 };
 
-currentSocket.onerror=()=>{
-if(socket===currentSocket) {
-if (historyTimeout !== null) clearTimeout(historyTimeout);
-setStatus("CONNECTION ERROR · CHECK NETWORK / API", "#ff5b75");
-$("scanresult").textContent = "WebSocket connection error. Check your internet connection, then reconnect.";
-}
+currentSocket.onerror = (event) => {
+    console.error("DERIV WEBSOCKET ERROR:", event);
+
+    if (socket === currentSocket) {
+        if (historyTimeout !== null) {
+            clearTimeout(historyTimeout);
+        }
+
+        setStatus("WEBSOCKET ERROR", "#ff5b75");
+
+        $("scanresult").textContent =
+            "WebSocket connection error. Check network, API access and browser console.";
+    }
 };
 
 currentSocket.onclose = (event) => {
