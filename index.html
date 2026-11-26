@@ -1228,13 +1228,19 @@ data=JSON.parse(event.data);
 return;
 }
 
-if(data.error) {
-setStatus("API ERROR","#ff5b75");
+if (data.error) {
+    if (historyTimeout !== null) {
+        clearTimeout(historyTimeout);
+        historyTimeout = null;
+    }
 
-$("scanresult").textContent =
-data.error.message || "Market data error";
+    setStatus("DERIV API ERROR", "#ff5b75");
 
-return;
+    $("scanresult").textContent =
+        "Error code: " + (data.error.code || "Unknown") +
+        "\nMessage: " + (data.error.message || "Unknown API error");
+
+    return;
 }
 
 /* Handle market comparison replies */
